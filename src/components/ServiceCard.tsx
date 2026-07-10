@@ -1,0 +1,149 @@
+import type { Decision, Service } from '../types'
+import { money } from '../lib/format'
+
+interface Props {
+  service: Service
+  decision: Decision
+  onDecide: (decision: Decision) => void
+}
+
+const stateStyles: Record<Decision, string> = {
+  pending: 'border-line',
+  approved: 'border-approve/30 bg-approve/[0.035]',
+  declined: 'border-line bg-transparent',
+}
+
+/**
+ * One recommended service. Shows title, a plain-English "why", the itemized
+ * labor + parts breakdown → job total, and side-by-side Decline / Approve
+ * controls with three visibly distinct states.
+ *
+ * A declined card stays on the page but is de-emphasized and struck through,
+ * so the customer sees what they turned down and can reverse it.
+ */
+export default function ServiceCard({ service, decision, onDecide }: Props) {
+  const declined = decision === 'declined'
+  const approved = decision === 'approved'
+
+  return (
+    <article
+      id={`service-${service.id}`}
+      data-decision={decision}
+      className={[
+        'scroll-mt-24 rounded-lg border px-5 py-5 transition-colors duration-300 sm:px-6',
+        stateStyles[decision],
+        declined ? 'opacity-70' : 'opacity-100',
+      ].join(' ')}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <h3
+          className={[
+            'font-serif text-xl leading-snug text-ink',
+            declined ? 'line-through decoration-ink-faint/60' : '',
+          ].join(' ')}
+        >
+          {service.title}
+        </h3>
+        {/* key on decision so the badge replays its pop when the state changes */}
+        <StateBadge key={decision} decision={decision} />
+      </div>
+
+      <p className="mt-2 max-w-prose text-[15px] leading-relaxed text-ink-soft">
+        {service.why}
+      </p>
+
+      {/* Itemized breakdown */}
+      <dl className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
+        {service.lineItems.map((item) => (
+          <div key={item.label} className="flex items-baseline justify-between gap-4">
+            <dt className="text-ink-soft">
+              <span className="mr-2 inline-block w-11 text-xs uppercase tracking-wide text-ink-faint">
+                {item.kind}
+              </span>
+              {item.label}
+              {item.detail && <span className="ml-1.5 text-ink-faint">· {item.detail}</span>}
+            </dt>
+            <dd className="tnum shrink-0 text-ink-soft">{money(item.amount)}</dd>
+          </div>
+        ))}
+        <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
+          <dt className="text-sm font-medium text-ink">Job total</dt>
+          <dd
+            className={[
+              'tnum shrink-0 text-base font-medium text-ink',
+              declined ? 'line-through decoration-ink-faint/60' : '',
+            ].join(' ')}
+          >
+            {money(service.jobCost)}
+          </dd>
+        </div>
+      </dl>
+
+      {/* Decision controls — side by side, three distinct states.
+          When a choice is active, the button title explains the tap-to-undo. */}
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          aria-pressed={declined}
+          title={declined ? 'Declined — tap to undo' : `Decline ${service.title}`}
+          onClick={() => onDecide(declined ? 'pending' : 'declined')}
+          className={[
+            'flex min-h-[44px] items-center justify-center gap-1.5 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/30',
+            declined
+              ? 'border-decline bg-decline text-paper'
+              : 'border-line text-ink-soft hover:border-decline hover:text-ink',
+          ].join(' ')}
+        >
+          {declined && <IconX />}
+          {declined ? 'Declined' : 'Decline'}
+        </button>
+        <button
+          type="button"
+          aria-pressed={approved}
+          title={approved ? 'Approved — tap to undo' : `Approve ${service.title}`}
+          onClick={() => onDecide(approved ? 'pending' : 'approved')}
+          className={[
+            'flex min-h-[44px] items-center justify-center gap-1.5 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-approve/40',
+            approved
+              ? 'border-approve bg-approve text-paper'
+              : 'border-line text-ink-soft hover:border-approve hover:text-approve',
+          ].join(' ')}
+        >
+          {approved && <IconCheck />}
+          {approved ? 'Approved' : 'Approve'}
+        </button>
+      </div>
+    </article>
+  )
+}
+
+function IconCheck() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
+      <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function IconX() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function StateBadge({ decision }: { decision: Decision }) {
+  const base = 'mt-1 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium'
+  if (decision === 'approved') {
+    return <span className={`${base} animate-pop bg-approve/12 text-approve`}>✓ Approved</span>
+  }
+  if (decision === 'declined') {
+    return (
+      <span className={`${base} animate-pop border border-line text-ink-faint`}>Declined</span>
+    )
+  }
+  return <span className={`${base} border border-line text-ink-faint`}>Pending</span>
+}
