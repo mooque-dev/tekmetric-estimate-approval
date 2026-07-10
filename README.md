@@ -5,6 +5,11 @@ review recommended services, approve/decline each, sign, and authorize the work.
 Built to demonstrate the two things a static file can't — **live ledger
 recalculation** and the **mobile → desktop responsive reflow**.
 
+**▶ Live demo:** https://mooque-dev.github.io/tekmetric-estimate-approval/
+
+Resize the browser (or use device toolbar) to see the reflow from a single
+phone column to the desktop two-column layout with a sticky ledger rail.
+
 ## Run
 
 ```bash
@@ -27,6 +32,13 @@ ledger promoted to a sticky rail (tablet 768px+) → wider rail and gutters
 - `src/components/` — three zones: `TrustAnchor`, `TriageSection` (+ `ServiceCard`,
   `SortControl`), and `AuthorizationSummary` (+ `SignaturePad`, `StickyTotalBar`,
   `Confirmation`). `AnimatedNumber` drives the count up/down on the total.
+
+## Deploy
+
+Pushing to `main` runs `.github/workflows/deploy.yml`, which builds with Vite
+and publishes `dist/` to GitHub Pages. Vite's `base` is set to the repo name in
+production ([vite.config.ts](vite.config.ts)) so assets resolve at the Pages
+subpath; local dev stays at `/`.
 
 ## The one data decision (see estimate.ts for the full note)
 
