@@ -1,3 +1,5 @@
+import { Toggle } from '@base-ui-components/react/toggle'
+import { ToggleGroup } from '@base-ui-components/react/toggle-group'
 import { useEffect, useRef, useState } from 'react'
 import { customer } from '../data/estimate'
 
@@ -96,22 +98,31 @@ export default function SignaturePad({ onChange }: Props) {
           Signature
           <span className="ml-1.5 font-normal text-ink-faint">— {customer.name}</span>
         </label>
-        <div className="inline-flex rounded-md border border-line p-0.5 text-xs">
+        <ToggleGroup
+          value={[mode]}
+          onValueChange={(groupValue) => {
+            const next = groupValue[groupValue.length - 1] as Mode | undefined
+            if (next) switchMode(next)
+          }}
+          aria-label="Signature input method"
+          className="inline-flex rounded-md border border-line p-0.5 text-xs"
+        >
           {(['draw', 'type'] as Mode[]).map((m) => (
-            <button
+            <Toggle
               key={m}
-              type="button"
-              onClick={() => switchMode(m)}
-              aria-pressed={mode === m}
-              className={[
-                'rounded-[5px] px-2.5 py-1 font-medium capitalize transition-colors',
-                mode === m ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink',
-              ].join(' ')}
+              value={m}
+              className={(state) =>
+                [
+                  'cursor-pointer rounded-[5px] px-2.5 py-1 font-medium capitalize transition-colors outline-none',
+                  'focus-visible:ring-2 focus-visible:ring-ink/25',
+                  state.pressed ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink',
+                ].join(' ')
+              }
             >
               {m}
-            </button>
+            </Toggle>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
 
       {mode === 'draw' ? (

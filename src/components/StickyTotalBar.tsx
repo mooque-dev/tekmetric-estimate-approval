@@ -1,3 +1,4 @@
+import { Progress } from '@base-ui-components/react/progress'
 import type { Ledger } from '../lib/ledger'
 import AnimatedNumber from './AnimatedNumber'
 
@@ -48,12 +49,11 @@ export default function StickyTotalBar({
   return (
     <div className="sticky bottom-0 z-20 border-t border-line bg-paper/95 shadow-bar backdrop-blur md:hidden">
       {/* Decision progress — a hairline that fills as cards are addressed. */}
-      <div className="h-0.5 w-full bg-ink/[0.06]">
-        <div
-          className="h-full bg-accent/70 transition-[width] duration-500 ease-out"
-          style={{ width: `${total ? (decided / total) * 100 : 0}%` }}
-        />
-      </div>
+      <Progress.Root value={decided} max={total} aria-label="Services reviewed">
+        <Progress.Track className="h-0.5 w-full bg-ink/[0.06]">
+          <Progress.Indicator className="h-full bg-accent/70 transition-all duration-500 ease-out" />
+        </Progress.Track>
+      </Progress.Root>
 
       <div
         className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3 sm:px-8"

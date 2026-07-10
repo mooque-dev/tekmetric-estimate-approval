@@ -5,6 +5,9 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* Height of the sticky top app bar; used to offset sticky section
+       headers and scroll-to anchors so nothing hides under the bar. */
+    --appbar-h: 3.5rem;
   }
 
   html {

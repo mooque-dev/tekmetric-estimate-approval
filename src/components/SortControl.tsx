@@ -1,3 +1,5 @@
+import { Toggle } from '@base-ui-components/react/toggle'
+import { ToggleGroup } from '@base-ui-components/react/toggle-group'
 import type { SortMode } from '../hooks/useEstimate'
 
 interface Props {
@@ -11,35 +13,37 @@ const options: { id: SortMode; label: string }[] = [
   { id: 'az', label: 'A–Z' },
 ]
 
-/** Segmented sort control. Reorders cards within each urgency group. */
+/** Segmented sort control (Base UI ToggleGroup). Reorders cards within groups. */
 export default function SortControl({ value, onChange }: Props) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
       <span className="text-xs uppercase tracking-[0.12em] text-ink-faint">Sort</span>
-      <div
-        role="radiogroup"
+      <ToggleGroup
+        value={[value]}
+        onValueChange={(groupValue) => {
+          // Single-select: ignore a deselect (empty), otherwise take the new value.
+          const next = groupValue[groupValue.length - 1] as SortMode | undefined
+          if (next) onChange(next)
+        }}
         aria-label="Sort services"
         className="inline-flex rounded-md border border-line p-0.5"
       >
-        {options.map((opt) => {
-          const active = value === opt.id
-          return (
-            <button
-              key={opt.id}
-              role="radio"
-              aria-checked={active}
-              type="button"
-              onClick={() => onChange(opt.id)}
-              className={[
-                'rounded-[5px] px-3 py-1.5 text-sm font-medium transition-colors',
-                active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink',
-              ].join(' ')}
-            >
-              {opt.label}
-            </button>
-          )
-        })}
-      </div>
+        {options.map((opt) => (
+          <Toggle
+            key={opt.id}
+            value={opt.id}
+            className={(state) =>
+              [
+                'cursor-pointer rounded-[5px] px-3 py-1.5 text-sm font-medium transition-colors outline-none',
+                'focus-visible:ring-2 focus-visible:ring-ink/25',
+                state.pressed ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink',
+              ].join(' ')
+            }
+          >
+            {opt.label}
+          </Toggle>
+        ))}
+      </ToggleGroup>
     </div>
   )
 }

@@ -41,7 +41,11 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
   const groups: Urgency[] = ['critical', 'maintenance']
 
   return (
-    <section aria-label="Recommended services">
+    <section
+      id="services"
+      aria-label="Recommended services"
+      className="scroll-mt-[calc(var(--appbar-h)+0.75rem)]"
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-xl font-semibold tracking-tight text-ink">Recommended services</h2>
         <SortControl value={sort} onChange={onSort} />
@@ -57,7 +61,11 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
 
           return (
             <div key={urgency}>
-              <div className={`flex items-baseline gap-3 border-b pb-2.5 ${meta.rule}`}>
+              {/* Sticky section header — pins under the app bar while you're in
+                  this group, then the next group's header takes over. */}
+              <div
+                className={`sticky top-[var(--appbar-h)] z-10 flex items-baseline gap-3 border-b bg-paper/95 pt-3 pb-2.5 backdrop-blur ${meta.rule}`}
+              >
                 <span className={`h-2 w-2 shrink-0 translate-y-[-1px] rounded-full ${meta.dot}`} />
                 <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink">
                   {meta.label}
@@ -66,7 +74,7 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
                   {items.length} {items.length === 1 ? 'service' : 'services'}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-ink-faint">{meta.note}</p>
+              <p className="mt-3 text-sm text-ink-soft">{meta.note}</p>
 
               <div className="mt-5 space-y-4">
                 {items.map((service) => (

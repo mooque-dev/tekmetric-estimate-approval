@@ -1,3 +1,4 @@
+import { Progress } from '@base-ui-components/react/progress'
 import { services } from '../data/estimate'
 import type { Ledger } from '../lib/ledger'
 import { money } from '../lib/format'
@@ -38,25 +39,22 @@ export default function AuthorizationSummary({
   const decided = total - ledger.pendingCount
 
   return (
-    <div id="summary" className="scroll-mt-6 rounded-lg border border-line bg-white/60 p-5 sm:p-6">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">Your total</h2>
-        <span className="tnum text-xs text-ink-faint">{decided} of {total} reviewed</span>
-      </div>
+    <div
+      id="summary"
+      className="scroll-mt-[calc(var(--appbar-h)+0.75rem)] rounded-lg border border-line bg-white/60 p-5 sm:p-6"
+    >
       {/* Hairline progress of decisions made (approved + declined). */}
-      <div
-        className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ink/[0.07]"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={decided}
-        aria-label="Services reviewed"
-      >
-        <div
-          className="h-full rounded-full bg-ink/60 transition-[width] duration-500 ease-out"
-          style={{ width: `${total ? (decided / total) * 100 : 0}%` }}
-        />
-      </div>
+      <Progress.Root value={decided} max={total} aria-label="Services reviewed">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-lg font-semibold tracking-tight text-ink">Your total</h2>
+          <span className="tnum text-xs text-ink-faint">
+            {decided} of {total} reviewed
+          </span>
+        </div>
+        <Progress.Track className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ink/[0.07]">
+          <Progress.Indicator className="h-full rounded-full bg-ink/60 transition-all duration-500 ease-out" />
+        </Progress.Track>
+      </Progress.Root>
 
       <dl className="mt-5 space-y-2.5 text-sm">
         <Row

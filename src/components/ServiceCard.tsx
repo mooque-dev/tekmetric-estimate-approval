@@ -52,25 +52,27 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
         {service.why}
       </p>
 
-      {/* Itemized breakdown */}
-      <dl className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
+      {/* Itemized breakdown — aligned columns: [kind chip] [label] [price] */}
+      <dl className="mt-5 space-y-2.5 border-t border-line pt-4 text-sm">
         {service.lineItems.map((item) => (
-          <div key={item.label} className="flex items-baseline justify-between gap-4">
-            <dt className="text-ink-soft">
-              <span className="mr-2 inline-block w-11 text-xs uppercase tracking-wide text-ink-faint">
+          <div key={item.label} className="flex items-baseline gap-3">
+            <dt className="flex min-w-0 flex-1 items-baseline gap-2.5">
+              <span className="w-14 shrink-0 rounded bg-ink/[0.055] py-0.5 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
                 {item.kind}
               </span>
-              {item.label}
-              {item.detail && <span className="ml-1.5 text-ink-faint">· {item.detail}</span>}
+              <span className="text-ink-soft">
+                {item.label}
+                {item.detail && <span className="text-ink-faint"> · {item.detail}</span>}
+              </span>
             </dt>
-            <dd className="tnum shrink-0 text-ink-soft">{money(item.amount)}</dd>
+            <dd className="tnum shrink-0 tabular-nums text-ink-soft">{money(item.amount)}</dd>
           </div>
         ))}
-        <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
-          <dt className="text-sm font-medium text-ink">Job total</dt>
+        <div className="mt-1 flex items-baseline gap-3 border-t border-line pt-3">
+          <dt className="flex-1 text-[15px] font-semibold text-ink">Job total</dt>
           <dd
             className={[
-              'tnum shrink-0 text-base font-medium text-ink',
+              'tnum shrink-0 text-base font-semibold text-ink',
               declined ? 'line-through decoration-ink-faint/60' : '',
             ].join(' ')}
           >

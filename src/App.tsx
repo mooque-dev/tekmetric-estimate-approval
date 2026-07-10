@@ -1,12 +1,18 @@
 import { useEstimate } from './hooks/useEstimate'
+import { useScrollSpy } from './hooks/useScrollSpy'
 import AuthorizationSummary from './components/AuthorizationSummary'
 import Confirmation from './components/Confirmation'
 import StickyTotalBar from './components/StickyTotalBar'
+import TopBar, { SECTIONS } from './components/TopBar'
 import TriageSection from './components/TriageSection'
 import TrustAnchor from './components/TrustAnchor'
 
+const SECTION_IDS = SECTIONS.map((s) => s.id)
+
 export default function App() {
   const { state, dispatch, ledger, allAddressed, hasSignature, canAuthorize } = useEstimate()
+  // Scroll-spy for the top-nav; offset ≈ app-bar height (56px) + a little.
+  const { active, scrollToSection } = useScrollSpy(SECTION_IDS, 72)
 
   // Explain WHY the authorize gate is closed (brief: always surface the reason).
   const gateReason = (() => {
@@ -32,6 +38,7 @@ export default function App() {
 
   return (
     <div className="min-h-dvh">
+      <TopBar active={active} onNavigate={scrollToSection} ledger={ledger} />
       <TrustAnchor />
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -51,9 +58,9 @@ export default function App() {
             />
           </div>
 
-          {/* Summary: inline in flow on mobile, sticky rail from tablet up. */}
+          {/* Summary: inline in flow on mobile, sticky rail (below the app bar) from tablet up. */}
           <aside className="mt-10 md:mt-0">
-            <div className="md:sticky md:top-6 lg:top-8">
+            <div className="md:sticky md:top-[calc(var(--appbar-h)+1rem)]">
               <AuthorizationSummary
                 ledger={ledger}
                 decisions={state.decisions}

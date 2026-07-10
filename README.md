@@ -10,6 +10,13 @@ recalculation** and the **mobile → desktop responsive reflow**.
 Resize the browser (or use device toolbar) to see the reflow from a single
 phone column to the desktop two-column layout with a sticky ledger rail.
 
+Navigation lives in a sticky top app bar (scroll-spy section tabs on
+mobile/tablet); section headers pin as you scroll; the primary total +
+Authorize action stays pinned to the bottom. Interactive primitives (tabs,
+segmented toggles, progress meters) use **Base UI**
+(`@base-ui-components/react`) — headless/unstyled, accessible — styled with
+Tailwind.
+
 ## Run
 
 ```bash
