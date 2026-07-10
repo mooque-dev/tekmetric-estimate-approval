@@ -28,40 +28,47 @@ export default function App() {
     }
   }, [])
 
+  // Move to the next item that still needs attention — the next pending card,
+  // or the summary when everything is decided. Used by both the timed
+  // auto-advance and the explicit "Next" button on a decided card.
+  const advanceFrom = useCallback(
+    (id: string, force = false) => {
+      cancelAdvance()
+      const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-decision]'))
+      const fromIdx = cards.findIndex((c) => c.id === `service-${id}`)
+      let target: HTMLElement | null = null
+      for (let i = fromIdx + 1; i < cards.length; i++) {
+        if (cards[i].dataset.decision === 'pending') {
+          target = cards[i]
+          break
+        }
+      }
+      if (!target) target = cards.find((c) => c.dataset.decision === 'pending') ?? null
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const behavior: ScrollBehavior = reduce ? 'auto' : 'smooth'
+      if (target) {
+        const r = target.getBoundingClientRect()
+        const fullyVisible = r.top >= 64 && r.bottom <= window.innerHeight
+        if (force || !fullyVisible) target.scrollIntoView({ behavior, block: 'center' })
+      } else {
+        // Everything is decided — go to the summary to sign.
+        document.getElementById('summary')?.scrollIntoView({ behavior, block: 'start' })
+      }
+    },
+    [cancelAdvance],
+  )
+
   const handleDecide = useCallback(
     (id: string, decision: Decision) => {
       dispatch({ type: 'decide', id, decision })
       cancelAdvance()
       if (decision === 'pending') return // undoing a decision shouldn't advance
-
-      advanceTimer.current = window.setTimeout(() => {
-        const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-decision]'))
-        const fromIdx = cards.findIndex((c) => c.id === `service-${id}`)
-        let target: HTMLElement | null = null
-        for (let i = fromIdx + 1; i < cards.length; i++) {
-          if (cards[i].dataset.decision === 'pending') {
-            target = cards[i]
-            break
-          }
-        }
-        if (!target) target = cards.find((c) => c.dataset.decision === 'pending') ?? null
-
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        const behavior: ScrollBehavior = reduce ? 'auto' : 'smooth'
-        if (target) {
-          const r = target.getBoundingClientRect()
-          const fullyVisible = r.top >= 64 && r.bottom <= window.innerHeight
-          if (!fullyVisible) target.scrollIntoView({ behavior, block: 'center' })
-        } else {
-          // Everything is decided — nudge toward the summary to sign.
-          const summary = document.getElementById('summary')
-          const r = summary?.getBoundingClientRect()
-          const visible = r ? r.top >= 0 && r.top <= window.innerHeight * 0.6 : false
-          if (summary && !visible) summary.scrollIntoView({ behavior, block: 'start' })
-        }
-      }, 900)
+      // Gentle auto-advance for the no-comment fast path; cancelled the moment
+      // the note field is focused (see onCommentFocus) or "Next" is tapped.
+      advanceTimer.current = window.setTimeout(() => advanceFrom(id), 1100)
     },
-    [dispatch, cancelAdvance],
+    [dispatch, cancelAdvance, advanceFrom],
   )
 
   // Explain WHY the authorize gate is closed (brief: always surface the reason).
@@ -105,10 +112,12 @@ export default function App() {
               decisions={state.decisions}
               comments={state.comments}
               sort={state.sort}
+              allDecided={allAddressed}
               onSort={(sort) => dispatch({ type: 'sort', sort })}
               onDecide={handleDecide}
               onComment={(id, comment) => dispatch({ type: 'comment', id, comment })}
               onCommentFocus={cancelAdvance}
+              onNext={(id) => advanceFrom(id, true)}
             />
           </div>
 

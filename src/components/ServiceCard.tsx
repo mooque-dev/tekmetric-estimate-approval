@@ -11,6 +11,10 @@ interface Props {
   onComment: (value: string) => void
   /** Called when the note field gains focus, to cancel any pending auto-advance. */
   onCommentFocus?: () => void
+  /** Advance to the next item that needs attention (or the summary when done). */
+  onNext?: () => void
+  /** True when no services remain pending — changes the Next label to "sign". */
+  allDecided?: boolean
   /** Show the urgency label on the card (used when the list is flat-sorted,
       i.e. not grouped under an urgency header). */
   showUrgency?: boolean
@@ -37,6 +41,8 @@ export default function ServiceCard({
   comment,
   onComment,
   onCommentFocus,
+  onNext,
+  allDecided,
   showUrgency,
 }: Props) {
   const declined = decision === 'declined'
@@ -153,7 +159,8 @@ export default function ServiceCard({
       </div>
 
       {/* Optional note — appears once a decision is made. Reason for a decline,
-          or a note on an approval. Focusing it cancels any pending auto-advance. */}
+          or a note on an approval. Focusing it cancels any pending auto-advance,
+          and "Next" is the explicit way to move on after writing a note. */}
       {decision !== 'pending' && (
         <div className="mt-3 animate-fade-up">
           <label htmlFor={noteId} className="text-xs font-medium text-ink-faint">
@@ -171,6 +178,16 @@ export default function ServiceCard({
             }
             className="mt-1.5 w-full resize-none rounded-md border border-line bg-white/70 px-3 py-2 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-faint focus:border-accent"
           />
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={onNext}
+              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+            >
+              {allDecided ? 'Review & sign' : 'Next item'}
+              <span aria-hidden>→</span>
+            </button>
+          </div>
         </div>
       )}
     </article>

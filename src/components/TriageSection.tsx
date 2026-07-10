@@ -8,10 +8,12 @@ interface Props {
   decisions: Record<string, Decision>
   comments: Record<string, string>
   sort: SortMode
+  allDecided: boolean
   onSort: (mode: SortMode) => void
   onDecide: (id: string, decision: Decision) => void
   onComment: (id: string, value: string) => void
   onCommentFocus: () => void
+  onNext: (id: string) => void
 }
 
 const groupMeta: Record<Urgency, { label: string; note: string; dot: string; rule: string }> = {
@@ -44,10 +46,12 @@ export default function TriageSection({
   decisions,
   comments,
   sort,
+  allDecided,
   onSort,
   onDecide,
   onComment,
   onCommentFocus,
+  onNext,
 }: Props) {
   const groups: Urgency[] = ['critical', 'maintenance']
   // Priority keeps the urgency grouping; Cost / A–Z collapse into one flat list
@@ -100,6 +104,8 @@ export default function TriageSection({
                       comment={comments[service.id] ?? ''}
                       onComment={(v) => onComment(service.id, v)}
                       onCommentFocus={onCommentFocus}
+                      onNext={() => onNext(service.id)}
+                      allDecided={allDecided}
                     />
                   ))}
                 </div>
@@ -125,6 +131,8 @@ export default function TriageSection({
                 comment={comments[service.id] ?? ''}
                 onComment={(v) => onComment(service.id, v)}
                 onCommentFocus={onCommentFocus}
+                onNext={() => onNext(service.id)}
+                allDecided={allDecided}
                 showUrgency
               />
             ))}
