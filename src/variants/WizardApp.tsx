@@ -1,3 +1,6 @@
+import { Progress } from '@base-ui-components/react/progress'
+import { Toggle } from '@base-ui-components/react/toggle'
+import { ToggleGroup } from '@base-ui-components/react/toggle-group'
 import { useState } from 'react'
 import { customer, services, shop, vehicle } from '../data/estimate'
 import { useEstimate } from '../hooks/useEstimate'
@@ -50,19 +53,26 @@ export default function WizardApp() {
               {shop.name} · {vehicle.year} {vehicle.make} {vehicle.model}
             </p>
           </div>
-          <div className="mt-4 flex items-center gap-1.5">
-            {Array.from({ length: totalSteps }).map((_, i) => (
-              <span
-                key={i}
-                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                  i < step ? 'bg-accent' : i === step ? 'bg-accent/50' : 'bg-ink/10'
-                }`}
-              />
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-ink-faint">
-            {onReview ? 'Review & authorize' : `Service ${step + 1} of ${services.length}`}
-          </p>
+          {/* Step progress — Base UI Progress for semantics, custom segments for looks */}
+          <Progress.Root
+            value={step}
+            max={totalSteps - 1}
+            aria-label={`Step ${step + 1} of ${totalSteps}`}
+          >
+            <div className="mt-4 flex items-center gap-1.5" aria-hidden>
+              {Array.from({ length: totalSteps }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                    i < step ? 'bg-accent' : i === step ? 'bg-accent/50' : 'bg-ink/10'
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-ink-faint">
+              {onReview ? 'Review & authorize' : `Service ${step + 1} of ${services.length}`}
+            </p>
+          </Progress.Root>
         </div>
       </header>
 
@@ -172,33 +182,40 @@ function ServiceStep({
         </div>
       </dl>
 
-      {/* Decision */}
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => onDecide('declined')}
-          className={[
-            'min-h-[52px] rounded-lg border text-sm font-semibold transition-colors',
-            decision === 'declined'
-              ? 'border-ink bg-ink text-paper'
-              : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
-          ].join(' ')}
+      {/* Decision — Base UI ToggleGroup preserves the three states (pending =
+          nothing pressed); clicking the active choice again undoes it. */}
+      <ToggleGroup
+        value={decision === 'pending' ? [] : [decision]}
+        onValueChange={(vals) => onDecide((vals[vals.length - 1] as Decision) ?? 'pending')}
+        className="mt-6 grid grid-cols-2 gap-3"
+      >
+        <Toggle
+          value="declined"
+          className={(state) =>
+            [
+              'min-h-[52px] rounded-lg border text-sm font-semibold transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/25',
+              state.pressed
+                ? 'border-ink bg-ink text-paper'
+                : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
+            ].join(' ')
+          }
         >
           {decision === 'declined' ? '✕ Declined' : 'Decline'}
-        </button>
-        <button
-          type="button"
-          onClick={() => onDecide('approved')}
-          className={[
-            'min-h-[52px] rounded-lg border text-sm font-semibold transition-colors',
-            decision === 'approved'
-              ? 'border-approve bg-approve text-paper'
-              : 'border-approve bg-approve text-paper hover:bg-approve/90',
-          ].join(' ')}
+        </Toggle>
+        <Toggle
+          value="approved"
+          className={(state) =>
+            [
+              'min-h-[52px] rounded-lg border border-approve bg-approve text-sm font-semibold text-paper transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-approve/40',
+              state.pressed ? '' : 'hover:bg-approve/90',
+            ].join(' ')
+          }
         >
           {decision === 'approved' ? '✓ Approved' : 'Approve'}
-        </button>
-      </div>
+        </Toggle>
+      </ToggleGroup>
 
       {decided && (
         <div className="mt-3 animate-fade-up">

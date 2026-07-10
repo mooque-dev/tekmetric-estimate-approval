@@ -1,3 +1,5 @@
+import { Toggle } from '@base-ui-components/react/toggle'
+import { ToggleGroup } from '@base-ui-components/react/toggle-group'
 import { services, shop, vehicle } from '../data/estimate'
 import { useEstimate } from '../hooks/useEstimate'
 import { money } from '../lib/format'
@@ -126,32 +128,42 @@ function CartRow({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => onDecide(declined ? 'pending' : 'declined')}
-          className={[
-            'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors',
-            declined
-              ? 'border-ink bg-ink text-paper'
-              : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
-          ].join(' ')}
+      {/* Add / Decline — Base UI ToggleGroup keeps all three states
+          (pending = neither pressed); clicking the active one undoes it. */}
+      <ToggleGroup
+        value={decision === 'pending' ? [] : [decision]}
+        onValueChange={(vals) => onDecide((vals[vals.length - 1] as Decision) ?? 'pending')}
+        className="mt-3 flex items-center gap-2"
+      >
+        <Toggle
+          value="declined"
+          className={(state) =>
+            [
+              'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-ink/25',
+              state.pressed
+                ? 'border-ink bg-ink text-paper'
+                : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
+            ].join(' ')
+          }
         >
           {declined ? '✕ Declined' : 'Decline'}
-        </button>
-        <button
-          type="button"
-          onClick={() => onDecide(approved ? 'pending' : 'approved')}
-          className={[
-            'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors',
-            approved
-              ? 'border-approve bg-approve text-paper'
-              : 'border-line text-approve hover:border-approve hover:bg-approve/[0.06]',
-          ].join(' ')}
+        </Toggle>
+        <Toggle
+          value="approved"
+          className={(state) =>
+            [
+              'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-approve/40',
+              state.pressed
+                ? 'border-approve bg-approve text-paper'
+                : 'border-line text-approve hover:border-approve hover:bg-approve/[0.06]',
+            ].join(' ')
+          }
         >
           {approved ? '✓ Added to order' : 'Add to order'}
-        </button>
-      </div>
+        </Toggle>
+      </ToggleGroup>
 
       {decision !== 'pending' && (
         <input
