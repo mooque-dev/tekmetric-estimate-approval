@@ -5,6 +5,9 @@ interface Props {
   service: Service
   decision: Decision
   onDecide: (decision: Decision) => void
+  /** Show the urgency label on the card (used when the list is flat-sorted,
+      i.e. not grouped under an urgency header). */
+  showUrgency?: boolean
 }
 
 const stateStyles: Record<Decision, string> = {
@@ -21,9 +24,10 @@ const stateStyles: Record<Decision, string> = {
  * A declined card stays on the page but is de-emphasized and struck through,
  * so the customer sees what they turned down and can reverse it.
  */
-export default function ServiceCard({ service, decision, onDecide }: Props) {
+export default function ServiceCard({ service, decision, onDecide, showUrgency }: Props) {
   const declined = decision === 'declined'
   const approved = decision === 'approved'
+  const critical = service.urgency === 'critical'
 
   return (
     <article
@@ -35,6 +39,20 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
         declined ? 'opacity-70' : 'opacity-100',
       ].join(' ')}
     >
+      {showUrgency && (
+        <div className="mb-2 flex items-center gap-1.5">
+          <span
+            className={`h-1.5 w-1.5 shrink-0 rounded-full ${critical ? 'bg-critical' : 'bg-ink-faint'}`}
+          />
+          <span
+            className={`text-[11px] font-semibold uppercase tracking-wider ${
+              critical ? 'text-critical' : 'text-ink-faint'
+            }`}
+          >
+            {critical ? 'Critical' : 'Maintenance'}
+          </span>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-4">
         <h3
           className={[

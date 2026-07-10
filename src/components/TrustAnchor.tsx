@@ -67,7 +67,7 @@ export default function TrustAnchor() {
             <p className="text-xs uppercase tracking-[0.14em] text-ink-faint">
               What you told us
             </p>
-            <blockquote className="mt-2 border-l-2 border-critical/50 pl-4 text-[17px] font-medium leading-relaxed text-ink">
+            <blockquote className="mt-2 rounded-lg bg-ink/[0.03] px-4 py-3 text-[15px] leading-relaxed text-ink-soft">
               “{customer.concerns}”
             </blockquote>
           </div>

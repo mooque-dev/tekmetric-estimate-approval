@@ -39,6 +39,9 @@ const order: Record<SortMode, (a: Service, b: Service) => number> = {
  */
 export default function TriageSection({ decisions, sort, onSort, onDecide }: Props) {
   const groups: Urgency[] = ['critical', 'maintenance']
+  // Priority keeps the urgency grouping; Cost / A–Z collapse into one flat list
+  // sorted across ALL services, so the sort visibly reorders the estimate.
+  const grouped = sort === 'priority'
 
   return (
     <section
@@ -51,45 +54,65 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
         <SortControl value={sort} onChange={onSort} />
       </div>
 
-      <div className="mt-8 space-y-10">
-        {groups.map((urgency) => {
-          const meta = groupMeta[urgency]
-          const items = services
-            .filter((s) => s.urgency === urgency)
+      {grouped ? (
+        <div className="mt-8 space-y-10">
+          {groups.map((urgency) => {
+            const meta = groupMeta[urgency]
+            const items = services.filter((s) => s.urgency === urgency)
+
+            return (
+              <div key={urgency}>
+                {/* Sticky section header — pins under the app bar while you're in
+                    this group, then the next group's header takes over. */}
+                <div
+                  className={`sticky top-[var(--appbar-h)] z-10 flex items-baseline gap-3 border-b bg-paper/95 pt-3 pb-2.5 backdrop-blur ${meta.rule}`}
+                >
+                  <span
+                    className={`h-2 w-2 shrink-0 translate-y-[-1px] rounded-full ${meta.dot}`}
+                  />
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink">
+                    {meta.label}
+                  </h3>
+                  <span className="tnum ml-auto text-xs text-ink-faint">
+                    {items.length} {items.length === 1 ? 'service' : 'services'}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-ink-soft">{meta.note}</p>
+
+                <div className="mt-5 space-y-4">
+                  {items.map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      decision={decisions[service.id] ?? 'pending'}
+                      onDecide={(d) => onDecide(service.id, d)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4">
+          <p className="text-sm text-ink-faint">
+            {sort === 'cost' ? 'Sorted by cost, high to low' : 'Sorted A–Z'} · urgency shown on
+            each service
+          </p>
+          {services
             .slice()
             .sort(order[sort])
-
-          return (
-            <div key={urgency}>
-              {/* Sticky section header — pins under the app bar while you're in
-                  this group, then the next group's header takes over. */}
-              <div
-                className={`sticky top-[var(--appbar-h)] z-10 flex items-baseline gap-3 border-b bg-paper/95 pt-3 pb-2.5 backdrop-blur ${meta.rule}`}
-              >
-                <span className={`h-2 w-2 shrink-0 translate-y-[-1px] rounded-full ${meta.dot}`} />
-                <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink">
-                  {meta.label}
-                </h3>
-                <span className="tnum ml-auto text-xs text-ink-faint">
-                  {items.length} {items.length === 1 ? 'service' : 'services'}
-                </span>
-              </div>
-              <p className="mt-3 text-sm text-ink-soft">{meta.note}</p>
-
-              <div className="mt-5 space-y-4">
-                {items.map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    decision={decisions[service.id] ?? 'pending'}
-                    onDecide={(d) => onDecide(service.id, d)}
-                  />
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+            .map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                decision={decisions[service.id] ?? 'pending'}
+                onDecide={(d) => onDecide(service.id, d)}
+                showUrgency
+              />
+            ))}
+        </div>
+      )}
     </section>
   )
 }
