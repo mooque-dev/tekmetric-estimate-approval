@@ -43,7 +43,7 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
   return (
     <section aria-label="Recommended services">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-serif text-2xl text-ink">Recommended services</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-ink">Recommended services</h2>
         <SortControl value={sort} onChange={onSort} />
       </div>
 

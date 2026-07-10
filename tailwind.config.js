@@ -4,9 +4,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Editorial serif for headings; clean sans for body/data.
-        serif: ['Newsreader', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        // One clean sans for the whole UI (data + headings), weight carries
+        // hierarchy. A script face is used only for the type-to-sign field.
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        signature: ['Caveat', 'ui-rounded', 'cursive'],
       },
       colors: {
         // Near-neutral warm-paper base + ink. One accent (ink-blue) used sparingly.

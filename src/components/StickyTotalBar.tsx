@@ -67,7 +67,7 @@ export default function StickyTotalBar({
           </p>
           <AnimatedNumber
             value={ledger.grandTotal}
-            className="tnum font-serif text-xl font-medium text-ink"
+            className="tnum text-xl font-bold tracking-tight text-ink"
           />
         </div>
         <button

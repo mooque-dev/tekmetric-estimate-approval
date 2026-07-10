@@ -40,7 +40,7 @@ export default function AuthorizationSummary({
   return (
     <div id="summary" className="scroll-mt-6 rounded-lg border border-line bg-white/60 p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-serif text-xl text-ink">Your total</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">Your total</h2>
         <span className="tnum text-xs text-ink-faint">{decided} of {total} reviewed</span>
       </div>
       {/* Hairline progress of decisions made (approved + declined). */}
@@ -85,11 +85,11 @@ export default function AuthorizationSummary({
         </div>
 
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
-          <dt className="font-serif text-lg text-ink">Total</dt>
+          <dt className="text-base font-semibold text-ink">Total</dt>
           <dd aria-live="polite">
             <AnimatedNumber
               value={ledger.grandTotal}
-              className="tnum font-serif text-2xl font-medium text-ink"
+              className="tnum text-2xl font-bold tracking-tight text-ink"
             />
           </dd>
         </div>

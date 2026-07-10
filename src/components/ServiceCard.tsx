@@ -38,7 +38,7 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
       <div className="flex items-start justify-between gap-4">
         <h3
           className={[
-            'font-serif text-xl leading-snug text-ink',
+            'text-lg font-semibold tracking-tight leading-snug text-ink',
             declined ? 'line-through decoration-ink-faint/60' : '',
           ].join(' ')}
         >
@@ -79,8 +79,9 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
         </div>
       </dl>
 
-      {/* Decision controls — side by side, three distinct states.
-          When a choice is active, the button title explains the tap-to-undo. */}
+      {/* Decision controls — Approve is the filled primary; Decline is the
+          quieter secondary. The filled emphasis follows the active choice, so
+          each card shows exactly one solid button. Titles explain tap-to-undo. */}
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -88,11 +89,11 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
           title={declined ? 'Declined — tap to undo' : `Decline ${service.title}`}
           onClick={() => onDecide(declined ? 'pending' : 'declined')}
           className={[
-            'flex min-h-[44px] items-center justify-center gap-1.5 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
+            'flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg border px-4 py-3 text-sm font-semibold transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/30',
             declined
-              ? 'border-decline bg-decline text-paper'
-              : 'border-line text-ink-soft hover:border-decline hover:text-ink',
+              ? 'border-ink bg-ink text-paper'
+              : 'border-line bg-transparent text-ink-soft hover:border-ink/50 hover:bg-ink/[0.03] hover:text-ink',
           ].join(' ')}
         >
           {declined && <IconX />}
@@ -104,11 +105,11 @@ export default function ServiceCard({ service, decision, onDecide }: Props) {
           title={approved ? 'Approved — tap to undo' : `Approve ${service.title}`}
           onClick={() => onDecide(approved ? 'pending' : 'approved')}
           className={[
-            'flex min-h-[44px] items-center justify-center gap-1.5 rounded-md border px-4 py-3 text-sm font-medium transition-colors',
+            'flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg border px-4 py-3 text-sm font-semibold transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-approve/40',
-            approved
-              ? 'border-approve bg-approve text-paper'
-              : 'border-line text-ink-soft hover:border-approve hover:text-approve',
+            declined
+              ? 'border-line bg-transparent text-ink-soft hover:border-approve hover:text-approve'
+              : 'border-approve bg-approve text-paper shadow-sm hover:bg-approve/90',
           ].join(' ')}
         >
           {approved && <IconCheck />}

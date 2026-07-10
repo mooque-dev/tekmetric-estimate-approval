@@ -28,7 +28,7 @@ export default function Confirmation({ ledger, decisions, onStartOver }: Props) 
         </svg>
       </div>
 
-      <h1 className="mt-6 font-serif text-3xl leading-tight text-ink sm:text-4xl">
+      <h1 className="mt-6 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink sm:text-4xl">
         You're all set, {customer.name.split(' ')[0]}.
       </h1>
       <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
@@ -47,8 +47,8 @@ export default function Confirmation({ ledger, decisions, onStartOver }: Props) 
           ))}
         </ul>
         <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-4">
-          <span className="font-serif text-lg text-ink">Total authorized</span>
-          <span className="tnum font-serif text-2xl font-medium text-ink">
+          <span className="text-base font-semibold text-ink">Total authorized</span>
+          <span className="tnum text-2xl font-bold tracking-tight text-ink">
             {money(ledger.grandTotal)}
           </span>
         </div>

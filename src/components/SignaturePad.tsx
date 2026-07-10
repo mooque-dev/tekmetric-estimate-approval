@@ -156,8 +156,7 @@ export default function SignaturePad({ onChange }: Props) {
               onChange(v.trim() ? v.trim() : null)
             }}
             placeholder="Type your full name"
-            className="w-full rounded-md border border-line bg-white px-3.5 py-3 font-serif text-2xl text-ink outline-none placeholder:font-sans placeholder:text-base placeholder:text-ink-faint focus:border-accent"
-            style={{ fontStyle: 'italic' }}
+            className="w-full rounded-md border border-line bg-white px-3.5 py-2 font-signature text-4xl leading-tight text-ink outline-none placeholder:font-sans placeholder:text-base placeholder:text-ink-faint focus:border-accent"
           />
           <p className="mt-1.5 text-xs text-ink-faint">
             Typing your name counts as your legal signature.
