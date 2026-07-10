@@ -1,5 +1,7 @@
+import { useCallback, useRef } from 'react'
 import { useEstimate } from './hooks/useEstimate'
 import { useScrollSpy } from './hooks/useScrollSpy'
+import type { Decision } from './types'
 import AuthorizationSummary from './components/AuthorizationSummary'
 import Confirmation from './components/Confirmation'
 import StickyTotalBar from './components/StickyTotalBar'
@@ -13,6 +15,54 @@ export default function App() {
   const { state, dispatch, ledger, allAddressed, hasSignature, canAuthorize } = useEstimate()
   // Scroll-spy for the top-nav; offset ≈ app-bar height (56px) + a little.
   const { active, scrollToSection } = useScrollSpy(SECTION_IDS, 72)
+
+  // Auto-advance: after a decision, gently move to the next item that still
+  // needs attention. The delay lets the state change register and — crucially —
+  // is cancelled the moment the customer focuses the optional note field, so
+  // adding a reason never gets interrupted.
+  const advanceTimer = useRef<number | undefined>(undefined)
+  const cancelAdvance = useCallback(() => {
+    if (advanceTimer.current) {
+      window.clearTimeout(advanceTimer.current)
+      advanceTimer.current = undefined
+    }
+  }, [])
+
+  const handleDecide = useCallback(
+    (id: string, decision: Decision) => {
+      dispatch({ type: 'decide', id, decision })
+      cancelAdvance()
+      if (decision === 'pending') return // undoing a decision shouldn't advance
+
+      advanceTimer.current = window.setTimeout(() => {
+        const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-decision]'))
+        const fromIdx = cards.findIndex((c) => c.id === `service-${id}`)
+        let target: HTMLElement | null = null
+        for (let i = fromIdx + 1; i < cards.length; i++) {
+          if (cards[i].dataset.decision === 'pending') {
+            target = cards[i]
+            break
+          }
+        }
+        if (!target) target = cards.find((c) => c.dataset.decision === 'pending') ?? null
+
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const behavior: ScrollBehavior = reduce ? 'auto' : 'smooth'
+        if (target) {
+          const r = target.getBoundingClientRect()
+          const fullyVisible = r.top >= 64 && r.bottom <= window.innerHeight
+          if (!fullyVisible) target.scrollIntoView({ behavior, block: 'center' })
+        } else {
+          // Everything is decided — nudge toward the summary to sign.
+          const summary = document.getElementById('summary')
+          const r = summary?.getBoundingClientRect()
+          const visible = r ? r.top >= 0 && r.top <= window.innerHeight * 0.6 : false
+          if (summary && !visible) summary.scrollIntoView({ behavior, block: 'start' })
+        }
+      }, 900)
+    },
+    [dispatch, cancelAdvance],
+  )
 
   // Explain WHY the authorize gate is closed (brief: always surface the reason).
   const gateReason = (() => {
@@ -31,6 +81,7 @@ export default function App() {
       <Confirmation
         ledger={ledger}
         decisions={state.decisions}
+        comments={state.comments}
         onStartOver={() => dispatch({ type: 'start-over' })}
       />
     )
@@ -52,9 +103,12 @@ export default function App() {
           <div className="min-w-0">
             <TriageSection
               decisions={state.decisions}
+              comments={state.comments}
               sort={state.sort}
               onSort={(sort) => dispatch({ type: 'sort', sort })}
-              onDecide={(id, decision) => dispatch({ type: 'decide', id, decision })}
+              onDecide={handleDecide}
+              onComment={(id, comment) => dispatch({ type: 'comment', id, comment })}
+              onCommentFocus={cancelAdvance}
             />
           </div>
 

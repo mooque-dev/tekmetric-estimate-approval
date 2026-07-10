@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { Decision, Service } from '../types'
 import { money } from '../lib/format'
 
@@ -5,6 +6,11 @@ interface Props {
   service: Service
   decision: Decision
   onDecide: (decision: Decision) => void
+  /** Optional customer note (reason for declining / note on approving). */
+  comment: string
+  onComment: (value: string) => void
+  /** Called when the note field gains focus, to cancel any pending auto-advance. */
+  onCommentFocus?: () => void
   /** Show the urgency label on the card (used when the list is flat-sorted,
       i.e. not grouped under an urgency header). */
   showUrgency?: boolean
@@ -24,10 +30,19 @@ const stateStyles: Record<Decision, string> = {
  * A declined card stays on the page but is de-emphasized and struck through,
  * so the customer sees what they turned down and can reverse it.
  */
-export default function ServiceCard({ service, decision, onDecide, showUrgency }: Props) {
+export default function ServiceCard({
+  service,
+  decision,
+  onDecide,
+  comment,
+  onComment,
+  onCommentFocus,
+  showUrgency,
+}: Props) {
   const declined = decision === 'declined'
   const approved = decision === 'approved'
   const critical = service.urgency === 'critical'
+  const noteId = useId()
 
   return (
     <article
@@ -136,6 +151,28 @@ export default function ServiceCard({ service, decision, onDecide, showUrgency }
           {approved ? 'Approved' : 'Approve'}
         </button>
       </div>
+
+      {/* Optional note — appears once a decision is made. Reason for a decline,
+          or a note on an approval. Focusing it cancels any pending auto-advance. */}
+      {decision !== 'pending' && (
+        <div className="mt-3 animate-fade-up">
+          <label htmlFor={noteId} className="text-xs font-medium text-ink-faint">
+            {declined ? 'Reason for declining' : 'Add a note'}{' '}
+            <span className="font-normal">(optional)</span>
+          </label>
+          <textarea
+            id={noteId}
+            value={comment}
+            rows={2}
+            onFocus={onCommentFocus}
+            onChange={(e) => onComment(e.target.value)}
+            placeholder={
+              declined ? 'e.g. I’d like to wait until my next visit' : 'Anything the shop should know'
+            }
+            className="mt-1.5 w-full resize-none rounded-md border border-line bg-white/70 px-3 py-2 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-faint focus:border-accent"
+          />
+        </div>
+      )}
     </article>
   )
 }

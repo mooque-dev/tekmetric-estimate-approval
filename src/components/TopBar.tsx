@@ -21,9 +21,24 @@ interface Props {
  * a review-progress meter (Base UI Progress). Nav lives up top; the primary
  * total + Authorize action stays pinned to the bottom.
  */
+type PipState = 'approved' | 'declined' | 'pending'
+
+const pipClass: Record<PipState, string> = {
+  approved: 'bg-approve',
+  declined: 'bg-ink-faint',
+  pending: 'bg-ink/15',
+}
+
 export default function TopBar({ active, onNavigate, ledger }: Props) {
   const total = ledger.approvedCount + ledger.declinedCount + ledger.pendingCount
   const decided = total - ledger.pendingCount
+
+  // One pip per service, grouped approved → declined → pending.
+  const pips: PipState[] = [
+    ...Array<PipState>(ledger.approvedCount).fill('approved'),
+    ...Array<PipState>(ledger.declinedCount).fill('declined'),
+    ...Array<PipState>(ledger.pendingCount).fill('pending'),
+  ]
 
   return (
     <header className="sticky top-0 z-30 h-[var(--appbar-h)] border-b border-line bg-paper/90 backdrop-blur-md">
@@ -77,16 +92,26 @@ export default function TopBar({ active, onNavigate, ledger }: Props) {
           </Tabs.List>
         </Tabs.Root>
 
-        {/* Review progress */}
+        {/* Review progress — one pip per service, coloured by state, so the bar
+            shows how far along you are AND the approve/decline mix at a glance. */}
         <Progress.Root
           value={decided}
           max={total}
           className="ml-auto flex flex-none items-center gap-2"
-          aria-label="Services reviewed"
+          aria-label={`${decided} of ${total} services reviewed`}
         >
-          <Progress.Track className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-ink/10 sm:block">
-            <Progress.Indicator className="h-full rounded-full bg-accent transition-all duration-500 ease-out" />
-          </Progress.Track>
+          <div
+            className="flex items-center gap-1"
+            aria-hidden
+            title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
+          >
+            {pips.map((s, i) => (
+              <span
+                key={i}
+                className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${pipClass[s]}`}
+              />
+            ))}
+          </div>
           <span className="tnum whitespace-nowrap text-xs font-medium text-ink-faint">
             {decided}/{total}
           </span>

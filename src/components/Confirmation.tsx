@@ -6,13 +6,15 @@ import type { Decision } from '../types'
 interface Props {
   ledger: Ledger
   decisions: Record<string, Decision>
+  comments: Record<string, string>
   onStartOver: () => void
 }
 
 /** Clean confirmation state shown after the customer authorizes the work. */
-export default function Confirmation({ ledger, decisions, onStartOver }: Props) {
+export default function Confirmation({ ledger, decisions, comments, onStartOver }: Props) {
   const approved = services.filter((s) => decisions[s.id] === 'approved')
   const declined = services.filter((s) => decisions[s.id] === 'declined')
+  const note = (id: string) => comments[id]?.trim()
 
   return (
     <main className="mx-auto max-w-xl animate-fade-up px-5 py-16 sm:px-8 sm:py-24">
@@ -38,11 +40,16 @@ export default function Confirmation({ ledger, decisions, onStartOver }: Props) 
 
       <div className="mt-9 rounded-lg border border-line bg-white/60 p-5 sm:p-6">
         <p className="text-xs uppercase tracking-[0.12em] text-ink-faint">Authorized work</p>
-        <ul className="mt-3 space-y-2 text-sm">
+        <ul className="mt-3 space-y-2.5 text-sm">
           {approved.map((s) => (
-            <li key={s.id} className="flex items-baseline justify-between gap-4">
-              <span className="text-ink">{s.title}</span>
-              <span className="tnum shrink-0 text-ink-soft">{money(s.jobCost)}</span>
+            <li key={s.id}>
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="text-ink">{s.title}</span>
+                <span className="tnum shrink-0 text-ink-soft">{money(s.jobCost)}</span>
+              </div>
+              {note(s.id) && (
+                <p className="mt-0.5 text-xs italic text-ink-faint">“{note(s.id)}”</p>
+              )}
             </li>
           ))}
         </ul>
@@ -56,13 +63,16 @@ export default function Confirmation({ ledger, decisions, onStartOver }: Props) 
         {declined.length > 0 && (
           <div className="mt-4 border-t border-line pt-4">
             <p className="text-xs uppercase tracking-[0.12em] text-ink-faint">Not authorized</p>
-            <ul className="mt-2 space-y-1.5 text-sm">
+            <ul className="mt-2 space-y-2 text-sm">
               {declined.map((s) => (
-                <li key={s.id} className="flex items-baseline justify-between gap-4 text-ink-faint">
-                  <span className="line-through decoration-ink-faint/50">{s.title}</span>
-                  <span className="tnum shrink-0 line-through decoration-ink-faint/50">
-                    {money(s.jobCost)}
-                  </span>
+                <li key={s.id} className="text-ink-faint">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="line-through decoration-ink-faint/50">{s.title}</span>
+                    <span className="tnum shrink-0 line-through decoration-ink-faint/50">
+                      {money(s.jobCost)}
+                    </span>
+                  </div>
+                  {note(s.id) && <p className="mt-0.5 text-xs italic">“{note(s.id)}”</p>}
                 </li>
               ))}
             </ul>

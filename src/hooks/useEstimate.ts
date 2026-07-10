@@ -7,6 +7,8 @@ export type SortMode = 'priority' | 'cost' | 'az'
 
 interface State {
   decisions: Record<string, Decision>
+  /** Optional customer note per service (reason for declining / note on approval). */
+  comments: Record<string, string>
   sort: SortMode
   signature: string | null
   authorized: boolean
@@ -17,6 +19,7 @@ interface State {
 type Action =
   | { type: 'decide'; id: string; decision: Decision }
   | { type: 'reset-decision'; id: string }
+  | { type: 'comment'; id: string; comment: string }
   | { type: 'sort'; sort: SortMode }
   | { type: 'sign'; signature: string | null }
   | { type: 'authorize' }
@@ -28,6 +31,7 @@ const initialState: State = {
     string,
     Decision
   >,
+  comments: {},
   sort: 'priority',
   signature: null,
   authorized: false,
@@ -40,6 +44,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, decisions: { ...state.decisions, [action.id]: action.decision } }
     case 'reset-decision':
       return { ...state, decisions: { ...state.decisions, [action.id]: 'pending' } }
+    case 'comment':
+      return { ...state, comments: { ...state.comments, [action.id]: action.comment } }
     case 'sort':
       return { ...state, sort: action.sort }
     case 'sign':
@@ -50,6 +56,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...initialState,
         decisions: { ...initialState.decisions },
+        comments: {},
         // keep the sort choice; force a fresh signature pad
         sort: state.sort,
         resetCount: state.resetCount + 1,

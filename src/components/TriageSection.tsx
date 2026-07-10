@@ -6,9 +6,12 @@ import SortControl from './SortControl'
 
 interface Props {
   decisions: Record<string, Decision>
+  comments: Record<string, string>
   sort: SortMode
   onSort: (mode: SortMode) => void
   onDecide: (id: string, decision: Decision) => void
+  onComment: (id: string, value: string) => void
+  onCommentFocus: () => void
 }
 
 const groupMeta: Record<Urgency, { label: string; note: string; dot: string; rule: string }> = {
@@ -37,7 +40,15 @@ const order: Record<SortMode, (a: Service, b: Service) => number> = {
  * maintenance distinction is core to the triage); the sort control reorders
  * cards within each group.
  */
-export default function TriageSection({ decisions, sort, onSort, onDecide }: Props) {
+export default function TriageSection({
+  decisions,
+  comments,
+  sort,
+  onSort,
+  onDecide,
+  onComment,
+  onCommentFocus,
+}: Props) {
   const groups: Urgency[] = ['critical', 'maintenance']
   // Priority keeps the urgency grouping; Cost / A–Z collapse into one flat list
   // sorted across ALL services, so the sort visibly reorders the estimate.
@@ -86,6 +97,9 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
                       service={service}
                       decision={decisions[service.id] ?? 'pending'}
                       onDecide={(d) => onDecide(service.id, d)}
+                      comment={comments[service.id] ?? ''}
+                      onComment={(v) => onComment(service.id, v)}
+                      onCommentFocus={onCommentFocus}
                     />
                   ))}
                 </div>
@@ -108,6 +122,9 @@ export default function TriageSection({ decisions, sort, onSort, onDecide }: Pro
                 service={service}
                 decision={decisions[service.id] ?? 'pending'}
                 onDecide={(d) => onDecide(service.id, d)}
+                comment={comments[service.id] ?? ''}
+                onComment={(v) => onComment(service.id, v)}
+                onCommentFocus={onCommentFocus}
                 showUrgency
               />
             ))}
