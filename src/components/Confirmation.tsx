@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { customer, services, shop, vehicle } from '../data/estimate'
 import type { Ledger } from '../lib/ledger'
 import { money } from '../lib/format'
+import { focusEl } from '../lib/a11y'
 import type { Decision } from '../types'
 
 interface Props {
@@ -16,8 +18,18 @@ export default function Confirmation({ ledger, decisions, comments, onStartOver 
   const declined = services.filter((s) => decisions[s.id] === 'declined')
   const note = (id: string) => comments[id]?.trim()
 
+  // Moving from the estimate to this success view is a big context change —
+  // pull focus to the heading so it's announced and keyboard focus isn't lost.
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    focusEl(headingRef.current)
+  }, [])
+
   return (
-    <main className="mx-auto max-w-xl animate-fade-up px-5 py-16 sm:px-8 sm:py-24">
+    <main
+      id="main"
+      className="mx-auto max-w-xl animate-fade-up px-5 py-16 outline-none sm:px-8 sm:py-24"
+    >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-approve/12 text-approve">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
@@ -30,7 +42,11 @@ export default function Confirmation({ ledger, decisions, comments, onStartOver 
         </svg>
       </div>
 
-      <h1 className="mt-6 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink sm:text-4xl">
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="mt-6 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink outline-none sm:text-4xl"
+      >
         You're all set, {customer.name.split(' ')[0]}.
       </h1>
       <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">

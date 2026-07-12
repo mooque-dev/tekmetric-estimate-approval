@@ -1,4 +1,5 @@
 import { Progress } from '@base-ui-components/react/progress'
+import { scrollToEl } from '../lib/a11y'
 import type { Ledger } from '../lib/ledger'
 import AnimatedNumber from './AnimatedNumber'
 
@@ -24,19 +25,17 @@ export default function StickyTotalBar({
   const total = ledger.approvedCount + ledger.declinedCount + ledger.pendingCount
   const decided = total - ledger.pendingCount
 
-  const scrollTo = (el: Element | null) =>
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
   const handleAction = () => {
     if (canAuthorize) {
       onAuthorize()
       return
     }
-    // Jump to the real blocker: first undecided card, else the signature.
+    // Jump to the real blocker: first undecided card, else the signature —
+    // and move focus there so keyboard users follow.
     if (ledger.pendingCount > 0) {
-      scrollTo(document.querySelector('[data-decision="pending"]'))
+      scrollToEl(document.querySelector('[data-decision="pending"]'), { focus: true })
     } else {
-      scrollTo(document.getElementById('summary'))
+      scrollToEl(document.getElementById('summary'), { block: 'start', focus: true })
     }
   }
 
@@ -65,6 +64,8 @@ export default function StickyTotalBar({
               ? `${ledger.pendingCount} left to review`
               : `${ledger.approvedCount} approved${ledger.declinedCount ? ` · ${ledger.declinedCount} declined` : ''}`}
           </p>
+          {/* The inline summary owns the live total announcement, so this
+              visible copy stays quiet to avoid double-speak on mobile. */}
           <AnimatedNumber
             value={ledger.grandTotal}
             className="tnum text-xl font-bold tracking-tight text-ink"

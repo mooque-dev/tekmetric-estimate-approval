@@ -84,11 +84,16 @@ export default function AuthorizationSummary({
 
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
           <dt className="text-base font-semibold text-ink">Total</dt>
-          <dd aria-live="polite">
+          <dd>
             <AnimatedNumber
               value={ledger.grandTotal}
+              aria-hidden
               className="tnum text-2xl font-bold tracking-tight text-ink"
             />
+            {/* Announce only the settled total, not every counting frame. */}
+            <span className="sr-only" aria-live="polite">
+              Total {money(ledger.grandTotal)}
+            </span>
           </dd>
         </div>
       </dl>
@@ -121,24 +126,29 @@ export default function AuthorizationSummary({
         )}
       </button>
 
-      {/* Surface WHY it's disabled. */}
-      {gateReason && (
-        <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs text-ink-faint">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-            <path d="M12 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="12" cy="7.75" r="1.05" fill="currentColor" />
-          </svg>
-          {gateReason}
-        </p>
-      )}
+      {/* Surface WHY it's disabled — announced politely as it changes. */}
+      <p
+        role="status"
+        className="mt-2.5 flex min-h-[1rem] items-center justify-center gap-1.5 text-center text-xs text-ink-soft"
+      >
+        {gateReason && (
+          <>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M12 11v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <circle cx="12" cy="7.75" r="1.05" fill="currentColor" />
+            </svg>
+            {gateReason}
+          </>
+        )}
+      </p>
 
       {decided > 0 && (
         <div className="mt-4 border-t border-line pt-3 text-center">
           <button
             type="button"
             onClick={onReset}
-            className="text-xs font-medium text-ink-faint underline-offset-2 hover:text-ink-soft hover:underline"
+            className="rounded px-2.5 py-1.5 text-xs font-medium text-ink-faint underline-offset-2 hover:text-ink-soft hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             Start over
           </button>

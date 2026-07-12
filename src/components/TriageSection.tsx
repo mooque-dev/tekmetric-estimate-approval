@@ -99,6 +99,7 @@ export default function TriageSection({
                     <ServiceCard
                       key={service.id}
                       service={service}
+                      titleAs="h4"
                       decision={decisions[service.id] ?? 'pending'}
                       onDecide={(d) => onDecide(service.id, d)}
                       comment={comments[service.id] ?? ''}

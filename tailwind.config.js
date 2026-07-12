@@ -18,7 +18,8 @@ export default {
           // Darkened for AA contrast on paper (~5:1) — used for meta / small print.
           faint: '#6e6a62',
         },
-        line: '#e6e3dd',
+        line: '#ddd9d1', // hairline dividers
+        'line-strong': '#c9c4ba', // boundaries of inputs / secondary controls
         accent: {
           DEFAULT: '#1f3a5f', // deep, quiet blue — primary action
           soft: '#3a5a82',

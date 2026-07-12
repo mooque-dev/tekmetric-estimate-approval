@@ -7,7 +7,11 @@ import { customer, shop, vehicle } from '../data/estimate'
  */
 export default function TrustAnchor() {
   return (
-    <header id="details" className="scroll-mt-[var(--appbar-h)] border-b border-line">
+    <section
+      id="details"
+      aria-label="Shop, vehicle and your reported concerns"
+      className="scroll-mt-[var(--appbar-h)] border-b border-line"
+    >
       <div className="mx-auto max-w-6xl px-5 pt-8 pb-7 sm:px-8 lg:pt-12">
         {/* Shop identity */}
         <div className="flex items-start justify-between gap-x-6 gap-y-1">
@@ -73,6 +77,6 @@ export default function TrustAnchor() {
           </div>
         </div>
       </div>
-    </header>
+    </section>
   )
 }

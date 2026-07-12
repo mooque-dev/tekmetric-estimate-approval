@@ -42,12 +42,18 @@ export default function CartApp() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-5 py-8 outline-none sm:px-8">
+        <h1 className="sr-only">Your repair estimate</h1>
         <div className="gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_360px]">
           {/* Service list */}
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold tracking-tight text-ink">Recommended services</h1>
-            <p className="mt-1 text-sm text-ink-faint">
+          <section aria-labelledby="services-heading" className="min-w-0">
+            <h2
+              id="services-heading"
+              className="text-xl font-semibold tracking-tight text-ink"
+            >
+              Recommended services
+            </h2>
+            <p className="mt-1 text-sm text-ink-soft">
               Add what you’d like done. Your receipt updates as you go.
             </p>
             <ul className="mt-5 divide-y divide-line border-y border-line">
@@ -62,10 +68,10 @@ export default function CartApp() {
                 />
               ))}
             </ul>
-          </div>
+          </section>
 
           {/* Receipt */}
-          <aside className="mt-10 lg:mt-0">
+          <aside aria-label="Order summary" className="mt-10 lg:mt-0">
             <div className="lg:sticky lg:top-6">
               <Receipt
                 ledger={ledger}
@@ -80,7 +86,7 @@ export default function CartApp() {
             </div>
           </aside>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
@@ -117,6 +123,9 @@ function CartRow({
               }`}
             >
               {service.title}
+              <span className="sr-only">
+                {' '}— {critical ? 'Critical safety item' : 'Preventative maintenance'}
+              </span>
             </h3>
           </div>
           <p className="mt-1 line-clamp-2 max-w-prose text-sm leading-relaxed text-ink-soft">
@@ -133,17 +142,18 @@ function CartRow({
       <ToggleGroup
         value={decision === 'pending' ? [] : [decision]}
         onValueChange={(vals) => onDecide((vals[vals.length - 1] as Decision) ?? 'pending')}
+        aria-label={`Add or decline ${service.title}`}
         className="mt-3 flex items-center gap-2"
       >
         <Toggle
           value="declined"
           className={(state) =>
             [
-              'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors outline-none',
-              'focus-visible:ring-2 focus-visible:ring-ink/25',
+              'inline-flex min-h-[38px] items-center rounded-md border px-3.5 py-2 text-xs font-semibold transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-ink/30',
               state.pressed
                 ? 'border-ink bg-ink text-paper'
-                : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
+                : 'border-line-strong text-ink-soft hover:border-ink/60 hover:text-ink',
             ].join(' ')
           }
         >
@@ -153,11 +163,11 @@ function CartRow({
           value="approved"
           className={(state) =>
             [
-              'rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors outline-none',
+              'inline-flex min-h-[38px] items-center rounded-md border px-3.5 py-2 text-xs font-semibold transition-colors outline-none',
               'focus-visible:ring-2 focus-visible:ring-approve/40',
               state.pressed
                 ? 'border-approve bg-approve text-paper'
-                : 'border-line text-approve hover:border-approve hover:bg-approve/[0.06]',
+                : 'border-line-strong text-approve hover:border-approve hover:bg-approve/[0.06]',
             ].join(' ')
           }
         >
@@ -170,8 +180,13 @@ function CartRow({
           type="text"
           value={comment}
           onChange={(e) => onComment(e.target.value)}
+          aria-label={
+            declined
+              ? `Reason for declining ${service.title} (optional)`
+              : `Note for the shop about ${service.title} (optional)`
+          }
           placeholder={declined ? 'Reason (optional)' : 'Note for the shop (optional)'}
-          className="mt-2 w-full max-w-md rounded-md border border-line bg-white/70 px-3 py-1.5 text-sm text-ink outline-none placeholder:text-ink-faint focus:border-approve"
+          className="mt-2 w-full max-w-md rounded-md border border-line-strong bg-white/70 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-faint focus:border-approve focus-visible:ring-2 focus-visible:ring-approve/30"
         />
       )}
     </li>
@@ -212,10 +227,10 @@ function Receipt({
 
   return (
     <div className="rounded-lg border border-line bg-white/70 p-5 sm:p-6">
-      <p className="text-center font-mono text-xs uppercase tracking-[0.2em] text-ink-faint">
+      <h2 className="text-center font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
         Your Order
-      </p>
-      <p className="mt-1 text-center font-mono text-[11px] text-ink-faint">
+      </h2>
+      <p className="mt-1 text-center font-mono text-[12px] text-ink-faint">
         {shop.name} · RO #132582
       </p>
       <div className="my-4 border-t border-dashed border-line" />
@@ -247,10 +262,16 @@ function Receipt({
         <div className="my-3 border-t border-dashed border-line" />
         <div className="flex items-baseline justify-between">
           <dt className="text-base font-semibold text-ink">TOTAL</dt>
-          <AnimatedNumber
-            value={ledger.grandTotal}
-            className="tnum text-xl font-bold text-ink"
-          />
+          <dd>
+            <AnimatedNumber
+              value={ledger.grandTotal}
+              aria-hidden
+              className="tnum text-xl font-bold text-ink"
+            />
+            <span className="sr-only" aria-live="polite">
+              Total {money(ledger.grandTotal)}
+            </span>
+          </dd>
         </div>
 
         {declined.length > 0 && (
@@ -275,6 +296,7 @@ function Receipt({
         onClick={onAuthorize}
         className={[
           'mt-4 w-full rounded-lg px-5 py-3.5 text-[15px] font-semibold transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-approve/40',
           canAuthorize
             ? 'bg-approve text-paper hover:bg-approve/90'
             : 'cursor-not-allowed bg-ink/[0.06] text-ink-faint',
@@ -282,7 +304,9 @@ function Receipt({
       >
         {canAuthorize ? `Authorize & pay ${money(ledger.grandTotal)}` : 'Authorize work'}
       </button>
-      {gate && <p className="mt-2.5 text-center text-xs text-ink-faint">{gate}</p>}
+      <p role="status" className="mt-2.5 min-h-[1rem] text-center text-xs text-ink-soft">
+        {gate ?? ''}
+      </p>
     </div>
   )
 }

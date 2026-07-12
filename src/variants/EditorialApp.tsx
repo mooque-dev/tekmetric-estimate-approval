@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { scrollToEl } from '../lib/a11y'
 import { useEstimate } from '../hooks/useEstimate'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import AuthorizationSummary from '../components/AuthorizationSummary'
@@ -35,7 +36,8 @@ export default function EditorialApp() {
 
   // Advance to the next item that needs attention — the next pending card, or
   // the summary when everything is decided. Triggered only by the explicit
-  // "Next item" button on a decided card.
+  // "Next item" button on a decided card. Moves focus too, so keyboard and
+  // screen-reader users are carried to the same place.
   const advanceFrom = useCallback((id: string) => {
     const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-decision]'))
     const fromIdx = cards.findIndex((c) => c.id === `service-${id}`)
@@ -48,10 +50,8 @@ export default function EditorialApp() {
     }
     if (!target) target = cards.find((c) => c.dataset.decision === 'pending') ?? null
 
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const behavior: ScrollBehavior = reduce ? 'auto' : 'smooth'
-    if (target) target.scrollIntoView({ behavior, block: 'center' })
-    else document.getElementById('summary')?.scrollIntoView({ behavior, block: 'start' })
+    if (target) scrollToEl(target, { block: 'center', focus: true })
+    else scrollToEl(document.getElementById('summary'), { block: 'start', focus: true })
   }, [])
 
   if (state.authorized) {
@@ -68,9 +68,10 @@ export default function EditorialApp() {
   return (
     <div className="min-h-dvh">
       <TopBar active={active} onNavigate={scrollToSection} ledger={ledger} />
-      <TrustAnchor />
+      <main id="main" tabIndex={-1} className="outline-none">
+        <TrustAnchor />
 
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="gap-8 py-10 md:grid md:grid-cols-[minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12 lg:py-14">
           <div className="min-w-0">
             <TriageSection
@@ -102,6 +103,7 @@ export default function EditorialApp() {
           </aside>
         </div>
       </div>
+      </main>
 
       <StickyTotalBar
         ledger={ledger}

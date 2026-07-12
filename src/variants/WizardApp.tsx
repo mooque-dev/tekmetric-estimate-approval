@@ -1,8 +1,9 @@
 import { Progress } from '@base-ui-components/react/progress'
 import { Toggle } from '@base-ui-components/react/toggle'
 import { ToggleGroup } from '@base-ui-components/react/toggle-group'
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { customer, services, shop, vehicle } from '../data/estimate'
+import { focusEl } from '../lib/a11y'
 import { useEstimate } from '../hooks/useEstimate'
 import { money } from '../lib/format'
 import type { Decision } from '../types'
@@ -22,6 +23,17 @@ export default function WizardApp() {
 
   const totalSteps = services.length + 1 // services + the review/sign step
   const onReview = step === services.length
+
+  // Each step is a new screen — move focus to its heading (after the first
+  // render) so keyboard and screen-reader users are carried along.
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    focusEl(document.querySelector<HTMLHeadingElement>('#main h1'))
+  }, [step])
 
   if (state.authorized) {
     return (
@@ -76,7 +88,7 @@ export default function WizardApp() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-5 py-8 sm:px-6">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-xl px-5 py-8 outline-none sm:px-6">
         {onReview ? (
           <ReviewStep
             ledger={ledger}
@@ -138,6 +150,7 @@ function ServiceStep({
   jobCost: number
 }) {
   const decided = decision !== 'pending'
+  const noteId = useId()
   return (
     <div className="animate-fade-up">
       <div className="flex items-center gap-1.5">
@@ -150,7 +163,10 @@ function ServiceStep({
           {critical ? 'Critical — Safety & Performance' : 'Preventative Maintenance'}
         </span>
       </div>
-      <h1 className="mt-2 text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+      <h1
+        tabIndex={-1}
+        className="mt-2 text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink outline-none"
+      >
         {title}
       </h1>
       <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{why}</p>
@@ -187,6 +203,7 @@ function ServiceStep({
       <ToggleGroup
         value={decision === 'pending' ? [] : [decision]}
         onValueChange={(vals) => onDecide((vals[vals.length - 1] as Decision) ?? 'pending')}
+        aria-label={`Approve or decline ${title}`}
         className="mt-6 grid grid-cols-2 gap-3"
       >
         <Toggle
@@ -194,10 +211,10 @@ function ServiceStep({
           className={(state) =>
             [
               'min-h-[52px] rounded-lg border text-sm font-semibold transition-colors outline-none',
-              'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/25',
+              'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/30',
               state.pressed
                 ? 'border-ink bg-ink text-paper'
-                : 'border-line text-ink-soft hover:border-ink/50 hover:text-ink',
+                : 'border-line-strong text-ink-soft hover:border-ink/60 hover:text-ink',
             ].join(' ')
           }
         >
@@ -219,18 +236,19 @@ function ServiceStep({
 
       {decided && (
         <div className="mt-3 animate-fade-up">
-          <label className="text-xs font-medium text-ink-faint">
+          <label htmlFor={noteId} className="text-xs font-medium text-ink-faint">
             {decision === 'declined' ? 'Reason for declining' : 'Add a note'}{' '}
             <span className="font-normal">(optional)</span>
           </label>
           <textarea
+            id={noteId}
             value={comment}
             rows={2}
             onChange={(e) => onComment(e.target.value)}
             placeholder={
               decision === 'declined' ? 'e.g. I’d like to wait' : 'Anything the shop should know'
             }
-            className="mt-1.5 w-full resize-none rounded-md border border-line bg-white/70 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-faint focus:border-accent"
+            className="mt-1.5 w-full resize-none rounded-md border border-line-strong bg-white/70 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-faint focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
           />
         </div>
       )}
@@ -241,7 +259,7 @@ function ServiceStep({
           <button
             type="button"
             onClick={onBack}
-            className="text-sm font-medium text-ink-faint hover:text-ink"
+            className="rounded-md px-3 py-2 text-sm font-medium text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
           >
             ← Back
           </button>
@@ -251,9 +269,11 @@ function ServiceStep({
         <button
           type="button"
           disabled={!decided}
+          aria-describedby={decided ? undefined : `${noteId}-hint`}
           onClick={onContinue}
           className={[
             'rounded-lg px-6 py-3 text-sm font-semibold transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent/40',
             decided
               ? 'bg-accent text-paper hover:bg-accent-soft'
               : 'cursor-not-allowed bg-ink/[0.06] text-ink-faint',
@@ -263,7 +283,9 @@ function ServiceStep({
         </button>
       </div>
       {!decided && (
-        <p className="mt-2 text-right text-xs text-ink-faint">Choose Approve or Decline to continue</p>
+        <p id={`${noteId}-hint`} className="mt-2 text-right text-xs text-ink-soft">
+          Choose Approve or Decline to continue
+        </p>
       )}
     </div>
   )
@@ -293,7 +315,10 @@ function ReviewStep({
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+      <h1
+        tabIndex={-1}
+        className="text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink outline-none"
+      >
         Review & authorize
       </h1>
       <p className="mt-2 text-[15px] text-ink-soft">Here’s your total based on your decisions.</p>
@@ -328,10 +353,16 @@ function ReviewStep({
         </div>
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
           <dt className="text-base font-semibold text-ink">Total</dt>
-          <AnimatedNumber
-            value={ledger.grandTotal}
-            className="tnum text-2xl font-bold tracking-tight text-ink"
-          />
+          <dd>
+            <AnimatedNumber
+              value={ledger.grandTotal}
+              aria-hidden
+              className="tnum text-2xl font-bold tracking-tight text-ink"
+            />
+            <span className="sr-only" aria-live="polite">
+              Total {money(ledger.grandTotal)}
+            </span>
+          </dd>
         </div>
       </dl>
 
@@ -350,6 +381,7 @@ function ReviewStep({
         onClick={onAuthorize}
         className={[
           'mt-4 w-full rounded-lg px-5 py-3.5 text-[15px] font-semibold transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent/40',
           canAuthorize
             ? 'bg-accent text-paper hover:bg-accent-soft'
             : 'cursor-not-allowed bg-ink/[0.06] text-ink-faint',
@@ -357,20 +389,20 @@ function ReviewStep({
       >
         {canAuthorize ? `Authorize Work — ${money(ledger.grandTotal)}` : 'Authorize Work'}
       </button>
-      {!canAuthorize && (
-        <p className="mt-2.5 text-center text-xs text-ink-faint">
-          {ledger.approvedCount === 0
+      <p role="status" className="mt-2.5 min-h-[1rem] text-center text-xs text-ink-soft">
+        {!canAuthorize
+          ? ledger.approvedCount === 0
             ? 'Approve at least one service to authorize'
             : !hasSignature
               ? 'Add your signature to continue'
-              : ''}
-        </p>
-      )}
+              : ''
+          : ''}
+      </p>
 
       <button
         type="button"
         onClick={onBack}
-        className="mt-6 text-sm font-medium text-ink-faint hover:text-ink"
+        className="mt-6 rounded-md px-3 py-2 text-sm font-medium text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
         ← Back to services
       </button>

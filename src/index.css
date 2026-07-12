@@ -23,10 +23,36 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
   }
+
+  /* Visible keyboard focus everywhere as a safety net; components may still
+     supply their own ring. Pointer clicks never trigger it (:focus-visible). */
+  :focus-visible {
+    outline: 2px solid theme('colors.accent.DEFAULT');
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  /* A focused non-interactive target (a card/heading we moved focus to) should
+     not draw a heavy box — a soft ring is enough to orient. */
+  [tabindex='-1']:focus-visible {
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* Skip link — first focusable element; visually hidden until focused. */
+  .skip-link {
+    @apply sr-only;
+  }
+  .skip-link:focus {
+    @apply not-sr-only fixed left-3 top-3 z-50 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper shadow-bar;
+  }
 }
 
 /* Respect users who prefer less motion — kill the number/state transitions. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {

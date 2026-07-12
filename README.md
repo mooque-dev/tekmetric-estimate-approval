@@ -54,6 +54,16 @@ ledger promoted to a sticky rail (tablet 768px+) → wider rail and gutters
   `SortControl`), and `AuthorizationSummary` (+ `SignaturePad`, `StickyTotalBar`,
   `Confirmation`). `AnimatedNumber` drives the count up/down on the total.
 
+## Accessibility
+
+Built to WCAG 2.1 AA intent across all three directions: a skip link, one
+`main`/`banner`/`nav` landmark set per view, correct heading nesting, labelled
+form fields and signature canvas, visible focus everywhere, focus moved on route
+/ step / "Next" / authorize changes, `aria-live` announcements of the *settled*
+total and the disabled-reason, reduced-motion-aware scrolling, and ≥38px touch
+targets. Interactive state is never conveyed by colour alone (icons + text +
+`aria-pressed`). Shared helpers live in `src/lib/a11y.ts`.
+
 ## Deploy
 
 Pushing to `main` runs `.github/workflows/deploy.yml`, which builds with Vite

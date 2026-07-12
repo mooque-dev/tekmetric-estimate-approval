@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type HTMLAttributes } from 'react'
 import { money } from '../lib/format'
 
-interface Props {
+interface Props extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   value: number
   className?: string
   /** ms */
@@ -15,7 +15,7 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
  * total visibly recalculates. Renders formatted currency with tabular numerals
  * (via the `tnum` class on the caller) so digits don't jitter width.
  */
-export default function AnimatedNumber({ value, className, duration = 550 }: Props) {
+export default function AnimatedNumber({ value, className, duration = 550, ...rest }: Props) {
   const [display, setDisplay] = useState(value)
   const fromRef = useRef(value)
   const rafRef = useRef<number>()
@@ -52,5 +52,9 @@ export default function AnimatedNumber({ value, className, duration = 550 }: Pro
     }
   }, [value, duration])
 
-  return <span className={className}>{money(display)}</span>
+  return (
+    <span className={className} {...rest}>
+      {money(display)}
+    </span>
+  )
 }

@@ -1,6 +1,6 @@
 import { Toggle } from '@base-ui-components/react/toggle'
 import { ToggleGroup } from '@base-ui-components/react/toggle-group'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { customer } from '../data/estimate'
 
 interface Props {
@@ -17,6 +17,7 @@ export default function SignaturePad({ onChange }: Props) {
   const [mode, setMode] = useState<Mode>('draw')
   const [typed, setTyped] = useState('')
   const [hasDrawing, setHasDrawing] = useState(false)
+  const inputId = useId()
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing = useRef(false)
@@ -94,7 +95,7 @@ export default function SignaturePad({ onChange }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-ink">
+        <label htmlFor={inputId} className="text-sm font-medium text-ink">
           Signature
           <span className="ml-1.5 font-normal text-ink-faint">— {customer.name}</span>
         </label>
@@ -105,7 +106,7 @@ export default function SignaturePad({ onChange }: Props) {
             if (next) switchMode(next)
           }}
           aria-label="Signature input method"
-          className="inline-flex rounded-md border border-line p-0.5 text-xs"
+          className="inline-flex rounded-md border border-line-strong p-0.5 text-xs"
         >
           {(['draw', 'type'] as Mode[]).map((m) => (
             <Toggle
@@ -113,8 +114,8 @@ export default function SignaturePad({ onChange }: Props) {
               value={m}
               className={(state) =>
                 [
-                  'cursor-pointer rounded-[5px] px-2.5 py-1 font-medium capitalize transition-colors outline-none',
-                  'focus-visible:ring-2 focus-visible:ring-ink/25',
+                  'cursor-pointer rounded-[5px] px-3 py-1.5 font-medium capitalize transition-colors outline-none',
+                  'focus-visible:ring-2 focus-visible:ring-ink/30',
                   state.pressed ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink',
                 ].join(' ')
               }
@@ -129,11 +130,12 @@ export default function SignaturePad({ onChange }: Props) {
         <div className="relative mt-2">
           <canvas
             ref={canvasRef}
+            aria-label="Signature drawing area. Draw with your finger or mouse, or switch to Type to enter your name with a keyboard."
             onPointerDown={start}
             onPointerMove={move}
             onPointerUp={end}
             onPointerLeave={end}
-            className="h-32 w-full touch-none rounded-md border border-line bg-white"
+            className="h-32 w-full touch-none rounded-md border border-line-strong bg-white"
           />
           {/* Signature baseline guide — sits under the ink, never blocks drawing. */}
           <div className="pointer-events-none absolute inset-x-4 bottom-6 flex items-center gap-2 text-ink-faint/70">
@@ -150,7 +152,7 @@ export default function SignaturePad({ onChange }: Props) {
             <button
               type="button"
               onClick={clearDrawing}
-              className="text-xs font-medium text-ink-soft underline-offset-2 hover:underline"
+              className="-mr-1 rounded px-2 py-1 text-xs font-medium text-ink-soft underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               Clear
             </button>
@@ -159,7 +161,9 @@ export default function SignaturePad({ onChange }: Props) {
       ) : (
         <div className="mt-2">
           <input
+            id={inputId}
             type="text"
+            autoComplete="name"
             value={typed}
             onChange={(e) => {
               const v = e.target.value
@@ -167,7 +171,7 @@ export default function SignaturePad({ onChange }: Props) {
               onChange(v.trim() ? v.trim() : null)
             }}
             placeholder="Type your full name"
-            className="w-full rounded-md border border-line bg-white px-3.5 py-2 font-signature text-4xl leading-tight text-ink outline-none placeholder:font-sans placeholder:text-base placeholder:text-ink-faint focus:border-accent"
+            className="w-full rounded-md border border-line-strong bg-white px-3.5 py-2 font-signature text-4xl leading-tight text-ink outline-none placeholder:font-sans placeholder:text-base placeholder:text-ink-faint focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
           />
           <p className="mt-1.5 text-xs text-ink-faint">
             Typing your name counts as your legal signature.

@@ -7,7 +7,7 @@ import { VARIANTS } from '../variants/registry'
  */
 export default function Gallery() {
   return (
-    <div className="min-h-dvh">
+    <main id="main" tabIndex={-1} className="min-h-dvh outline-none">
       <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
         <p className="text-xs uppercase tracking-[0.16em] text-ink-faint">
           Tekmetric · Estimate approval
@@ -70,6 +70,6 @@ export default function Gallery() {
           has no backend — everything is client-side.
         </p>
       </div>
-    </div>
+    </main>
   )
 }

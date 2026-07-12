@@ -4,6 +4,8 @@ import { money } from '../lib/format'
 
 interface Props {
   service: Service
+  /** Heading level for the title, so it nests correctly (h4 under a group h3). */
+  titleAs?: 'h3' | 'h4'
   decision: Decision
   onDecide: (decision: Decision) => void
   /** Optional customer note (reason for declining / note on approving). */
@@ -36,6 +38,7 @@ const stateStyles: Record<Decision, string> = {
  */
 export default function ServiceCard({
   service,
+  titleAs: Title = 'h3',
   decision,
   onDecide,
   comment,
@@ -75,14 +78,14 @@ export default function ServiceCard({
         </div>
       )}
       <div className="flex items-start justify-between gap-4">
-        <h3
+        <Title
           className={[
             'text-lg font-semibold tracking-tight leading-snug text-ink',
             declined ? 'line-through decoration-ink-faint/60' : '',
           ].join(' ')}
         >
           {service.title}
-        </h3>
+        </Title>
         {/* key on decision so the badge replays its pop when the state changes */}
         <StateBadge key={decision} decision={decision} />
       </div>
@@ -134,7 +137,7 @@ export default function ServiceCard({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink/30',
             declined
               ? 'border-ink bg-ink text-paper'
-              : 'border-line bg-transparent text-ink-soft hover:border-ink/50 hover:bg-ink/[0.03] hover:text-ink',
+              : 'border-line-strong bg-transparent text-ink-soft hover:border-ink/60 hover:bg-ink/[0.03] hover:text-ink',
           ].join(' ')}
         >
           {declined && <IconX />}
@@ -149,7 +152,7 @@ export default function ServiceCard({
             'flex min-h-[46px] items-center justify-center gap-1.5 rounded-lg border px-4 py-3 text-sm font-semibold transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-approve/40',
             declined
-              ? 'border-line bg-transparent text-ink-soft hover:border-approve hover:text-approve'
+              ? 'border-line-strong bg-transparent text-ink-soft hover:border-approve hover:text-approve'
               : 'border-approve bg-approve text-paper shadow-sm hover:bg-approve/90',
           ].join(' ')}
         >
@@ -176,7 +179,7 @@ export default function ServiceCard({
             placeholder={
               declined ? 'e.g. I’d like to wait until my next visit' : 'Anything the shop should know'
             }
-            className="mt-1.5 w-full resize-none rounded-md border border-line bg-white/70 px-3 py-2 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-faint focus:border-accent"
+            className="mt-1.5 w-full resize-none rounded-md border border-line-strong bg-white/70 px-3 py-2 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-faint focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
           />
           <div className="mt-2 flex justify-end">
             <button

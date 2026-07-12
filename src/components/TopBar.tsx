@@ -41,7 +41,10 @@ export default function TopBar({ active, onNavigate, ledger }: Props) {
   ]
 
   return (
-    <header className="sticky top-0 z-30 h-[var(--appbar-h)] border-b border-line bg-paper/90 backdrop-blur-md">
+    <header
+      aria-label="Estimate navigation and progress"
+      className="sticky top-0 z-30 h-[var(--appbar-h)] border-b border-line bg-paper/90 backdrop-blur-md"
+    >
       <div className="mx-auto grid h-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8">
         {/* Persistent context — whose car this is */}
         <div className="flex min-w-0 items-center gap-2">
@@ -64,7 +67,10 @@ export default function TopBar({ active, onNavigate, ledger }: Props) {
           onValueChange={(value) => onNavigate(String(value))}
           className="lg:hidden"
         >
-          <Tabs.List className="relative flex items-center justify-center gap-1">
+          <Tabs.List
+            aria-label="Jump to section"
+            className="relative flex items-center justify-center gap-1"
+          >
             {SECTIONS.map((s) => (
               <Tabs.Tab
                 key={s.id}

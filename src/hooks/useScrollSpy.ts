@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { prefersReducedMotion } from '../lib/a11y'
 
 /**
  * Tracks which section is currently in view for the top-nav scroll-spy.
@@ -48,7 +49,7 @@ export function useScrollSpy(ids: string[], offset: number) {
     if (!el) return
     lockUntil.current = performance.now() + 700
     setActive(id)
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
   }
 
   return { active, scrollToSection }
