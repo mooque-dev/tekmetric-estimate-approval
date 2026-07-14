@@ -127,26 +127,31 @@ export default function SignaturePad({ onChange }: Props) {
       </div>
 
       {mode === 'draw' ? (
-        <div className="relative mt-2">
-          <canvas
-            ref={canvasRef}
-            aria-label="Signature drawing area. Draw with your finger or mouse, or switch to Type to enter your name with a keyboard."
-            onPointerDown={start}
-            onPointerMove={move}
-            onPointerUp={end}
-            onPointerLeave={end}
-            className="h-32 w-full touch-none rounded-md border border-line-strong bg-white"
-          />
-          {/* Signature baseline guide — sits under the ink, never blocks drawing. */}
-          <div className="pointer-events-none absolute inset-x-4 bottom-6 flex items-center gap-2 text-ink-faint/70">
-            <span className="text-sm leading-none">✕</span>
-            <span className="h-px flex-1 bg-line" />
+        <div className="mt-2">
+          {/* Only the canvas and its overlays share this positioning context,
+              so the baseline guide and placeholder anchor to the canvas box —
+              not to the caption/Clear row below it. */}
+          <div className="relative">
+            <canvas
+              ref={canvasRef}
+              aria-label="Signature drawing area. Draw with your finger or mouse, or switch to Type to enter your name with a keyboard."
+              onPointerDown={start}
+              onPointerMove={move}
+              onPointerUp={end}
+              onPointerLeave={end}
+              className="h-32 w-full touch-none rounded-md border border-line-strong bg-white"
+            />
+            {/* Signature baseline guide — sits under the ink, never blocks drawing. */}
+            <div className="pointer-events-none absolute inset-x-4 bottom-6 flex items-center gap-2 text-ink-faint/70">
+              <span className="text-sm leading-none">✕</span>
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            {!hasDrawing && (
+              <span className="pointer-events-none absolute inset-x-0 top-5 text-center text-sm text-ink-faint">
+                Sign here with your finger or mouse
+              </span>
+            )}
           </div>
-          {!hasDrawing && (
-            <span className="pointer-events-none absolute inset-x-0 top-5 text-center text-sm text-ink-faint">
-              Sign here with your finger or mouse
-            </span>
-          )}
           <div className="mt-1.5 flex items-center justify-between">
             <span className="text-xs text-ink-faint">Draw your signature above</span>
             <button

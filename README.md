@@ -7,19 +7,20 @@ recalculation** and the **mobile → desktop responsive reflow**.
 
 **▶ Live demo:** https://mooque-dev.github.io/tekmetric-estimate-approval/
 
-The landing page is a **gallery of three design directions** for the same
-estimate (same data, same ledger, same state — different UX bets):
+The **front door is the final design — Editorial Ledger**: one calm,
+typography-led scroll where services are grouped by urgency, the total
+recalculates live in a sticky ledger rail, and advancing is always explicit
+(the "Next item" button only — no auto-advance ambiguity).
 
-- **A · Editorial Ledger** (`#editorial`) — one calm typography-led scroll,
-  services grouped by urgency, sticky nav + ledger rail.
-- **B · Guided Decisions** (`#guided`) — a stepped wizard, one service per
-  screen; advancing *is* the interaction (no auto-advance ambiguity).
-- **C · Itemized Receipt** (`#cart`) — a dense list you toggle in/out beside a
-  live receipt that recalculates like a shopping cart.
+It was chosen out of a three-direction exploration on the *same* data, ledger,
+and state model. The exploration is preserved as a record — reachable by hash,
+no longer the entry point:
 
-Rationale for each lives on the gallery page and in `src/variants/registry.ts`.
-Direction A resolves the earlier auto-advance/next-button redundancy by making
-advancing explicit (the "Next item" button only).
+- **Editorial Ledger** (default / `#editorial`) — the shipped direction.
+- **Guided Decisions** (`#guided`) — a stepped wizard, one service per screen.
+- **Itemized Receipt** (`#cart`) — a dense list beside a live cart-style receipt.
+- **Exploration gallery** (`#gallery`) — the three side by side with the
+  reasoning behind each (also in `src/variants/registry.ts`).
 
 Resize the browser (or use device toolbar) to see the reflow from a single
 phone column to the desktop two-column layout with a sticky ledger rail.
