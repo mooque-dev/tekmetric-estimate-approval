@@ -1,6 +1,6 @@
 import { Toggle } from '@base-ui-components/react/toggle'
 import { ToggleGroup } from '@base-ui-components/react/toggle-group'
-import { services, shop, vehicle } from '../data/estimate'
+import { customer, services, shop, vehicle } from '../data/estimate'
 import { useEstimate } from '../hooks/useEstimate'
 import { money } from '../lib/format'
 import type { Decision, Service } from '../types'
@@ -231,7 +231,7 @@ function Receipt({
         Your Order
       </h2>
       <p className="mt-1 text-center font-mono text-[12px] text-ink-faint">
-        {shop.name} · RO #132582
+        {shop.name} · RO #{customer.repairOrder}
       </p>
       <div className="my-4 border-t border-dashed border-line" />
 
