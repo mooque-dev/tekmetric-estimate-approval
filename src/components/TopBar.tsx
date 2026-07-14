@@ -1,8 +1,5 @@
-import { Progress } from '@base-ui-components/react/progress'
 import { Tabs } from '@base-ui-components/react/tabs'
 import { vehicle } from '../data/estimate'
-import type { Ledger } from '../lib/ledger'
-import { isLongList } from '../lib/scale'
 
 export const SECTIONS = [
   { id: 'details', label: 'Details' },
@@ -13,37 +10,20 @@ export const SECTIONS = [
 interface Props {
   active: string
   onNavigate: (id: string) => void
-  ledger: Ledger
 }
 
 /**
- * Sticky top app bar: persistent context (vehicle) that survives scrolling,
- * a section-jump nav (Base UI Tabs) driven by scroll-spy on mobile/tablet, and
- * a review-progress meter (Base UI Progress). Nav lives up top; the primary
- * total + Authorize action stays pinned to the bottom.
+ * Sticky top app bar: persistent context (whose car this is) that survives
+ * scrolling, plus a section-jump nav (Base UI Tabs) driven by scroll-spy on
+ * mobile / tablet. Review progress is intentionally NOT shown here — it lives
+ * in the two places that own the total: the fixed bottom bar on mobile/tablet
+ * ("X left to review") and the sticky ledger rail on desktop ("X of N
+ * reviewed"). A third copy in the header was redundant.
  */
-type PipState = 'approved' | 'declined' | 'pending'
-
-const pipClass: Record<PipState, string> = {
-  approved: 'bg-approve',
-  declined: 'bg-ink-faint',
-  pending: 'bg-ink/15',
-}
-
-export default function TopBar({ active, onNavigate, ledger }: Props) {
-  const total = ledger.approvedCount + ledger.declinedCount + ledger.pendingCount
-  const decided = total - ledger.pendingCount
-
-  // One pip per service, grouped approved → declined → pending.
-  const pips: PipState[] = [
-    ...Array<PipState>(ledger.approvedCount).fill('approved'),
-    ...Array<PipState>(ledger.declinedCount).fill('declined'),
-    ...Array<PipState>(ledger.pendingCount).fill('pending'),
-  ]
-
+export default function TopBar({ active, onNavigate }: Props) {
   return (
     <header
-      aria-label="Estimate navigation and progress"
+      aria-label="Estimate navigation"
       className="sticky top-0 z-30 h-[var(--appbar-h)] border-b border-line bg-paper/90 backdrop-blur-md"
     >
       <div className="mx-auto grid h-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 sm:px-8">
@@ -98,54 +78,6 @@ export default function TopBar({ active, onNavigate, ledger }: Props) {
             />
           </Tabs.List>
         </Tabs.Root>
-
-        {/* Review progress. Short lists get one pip per service, coloured by
-            state, so the bar shows progress AND the approve/decline mix at a
-            glance. Long lists switch to a fixed-width composition fill: the
-            same information in constant space, so it never crowds the header or
-            pushes the count off-screen (which a long pip row does on mobile).
-            The `decided/total` count is always present and never shrinks. */}
-        <Progress.Root
-          value={decided}
-          max={total}
-          className="ml-auto flex flex-none items-center gap-2"
-          aria-label={`${decided} of ${total} services reviewed`}
-        >
-          {isLongList(total) ? (
-            <div
-              className="h-1.5 w-16 overflow-hidden rounded-full bg-ink/15"
-              aria-hidden
-              title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
-            >
-              <div className="flex h-full w-full">
-                <span
-                  className="h-full bg-approve transition-all duration-500 ease-out"
-                  style={{ width: `${total ? (ledger.approvedCount / total) * 100 : 0}%` }}
-                />
-                <span
-                  className="h-full bg-ink-faint transition-all duration-500 ease-out"
-                  style={{ width: `${total ? (ledger.declinedCount / total) * 100 : 0}%` }}
-                />
-              </div>
-            </div>
-          ) : (
-            <div
-              className="flex items-center gap-1"
-              aria-hidden
-              title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
-            >
-              {pips.map((s, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${pipClass[s]}`}
-                />
-              ))}
-            </div>
-          )}
-          <span className="tnum flex-none whitespace-nowrap text-xs font-medium text-ink-faint">
-            {decided}/{total}
-          </span>
-        </Progress.Root>
       </div>
     </header>
   )

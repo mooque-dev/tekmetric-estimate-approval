@@ -67,7 +67,7 @@ export default function EditorialApp() {
 
   return (
     <div className="min-h-dvh">
-      <TopBar active={active} onNavigate={scrollToSection} ledger={ledger} />
+      <TopBar active={active} onNavigate={scrollToSection} />
       <main id="main" tabIndex={-1} className="outline-none">
         <TrustAnchor />
 
