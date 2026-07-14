@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import type { Decision, Service } from '../types'
 import { money } from '../lib/format'
 
@@ -20,6 +20,9 @@ interface Props {
   /** Show the urgency label on the card (used when the list is flat-sorted,
       i.e. not grouped under an urgency header). */
   showUrgency?: boolean
+  /** On long lists, collapse the "why" to one line by default (tap to expand),
+      so the estimate doesn't become a wall of reasoning text. */
+  collapsibleWhy?: boolean
 }
 
 const stateStyles: Record<Decision, string> = {
@@ -47,11 +50,15 @@ export default function ServiceCard({
   onNext,
   allDecided,
   showUrgency,
+  collapsibleWhy,
 }: Props) {
   const declined = decision === 'declined'
   const approved = decision === 'approved'
   const critical = service.urgency === 'critical'
   const noteId = useId()
+  const whyId = useId()
+  const [expanded, setExpanded] = useState(false)
+  const clampWhy = collapsibleWhy && !expanded
 
   return (
     <article
@@ -90,9 +97,29 @@ export default function ServiceCard({
         <StateBadge key={decision} decision={decision} />
       </div>
 
-      <p className="mt-2 max-w-prose text-[15px] leading-relaxed text-ink-soft">
+      <p
+        id={whyId}
+        className={[
+          'mt-2 max-w-prose text-[15px] leading-relaxed text-ink-soft',
+          clampWhy ? 'line-clamp-1' : '',
+        ].join(' ')}
+      >
         {service.why}
       </p>
+      {collapsibleWhy && (
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={whyId}
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-1 inline-flex items-center gap-1 rounded text-[13px] font-semibold text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+        >
+          {expanded ? 'Show less' : 'Why this matters'}
+          <span aria-hidden className={`transition-transform ${expanded ? 'rotate-180' : ''}`}>
+            ⌄
+          </span>
+        </button>
+      )}
 
       {/* Itemized breakdown — aligned columns: [kind chip] [label] [price] */}
       <dl className="mt-5 space-y-2.5 border-t border-line pt-4 text-sm">

@@ -1,5 +1,6 @@
 import { services } from '../data/estimate'
 import type { SortMode } from '../hooks/useEstimate'
+import { isLongList } from '../lib/scale'
 import type { Decision, Service, Urgency } from '../types'
 import ServiceCard from './ServiceCard'
 import SortControl from './SortControl'
@@ -57,6 +58,12 @@ export default function TriageSection({
   // Priority keeps the urgency grouping; Cost / A–Z collapse into one flat list
   // sorted across ALL services, so the sort visibly reorders the estimate.
   const grouped = sort === 'priority'
+  // On a long list, re-sorting is a repeated action, so the control pins under
+  // the app bar; the group headers then stack below the pinned sort row.
+  const scaled = isLongList(services.length)
+  const groupHeaderTop = scaled
+    ? 'top-[calc(var(--appbar-h)+3.25rem)]'
+    : 'top-[var(--appbar-h)]'
 
   return (
     <section
@@ -64,7 +71,14 @@ export default function TriageSection({
       aria-label="Recommended services"
       className="scroll-mt-[calc(var(--appbar-h)+0.75rem)]"
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div
+        className={[
+          'flex flex-wrap items-center justify-between gap-4',
+          scaled
+            ? 'sticky top-[var(--appbar-h)] z-20 -mx-5 border-b border-line bg-paper/95 px-5 py-3 backdrop-blur sm:-mx-8 sm:px-8'
+            : '',
+        ].join(' ')}
+      >
         <h2 className="text-xl font-semibold tracking-tight text-ink">Recommended services</h2>
         <SortControl value={sort} onChange={onSort} />
       </div>
@@ -77,10 +91,11 @@ export default function TriageSection({
 
             return (
               <div key={urgency}>
-                {/* Sticky section header — pins under the app bar while you're in
-                    this group, then the next group's header takes over. */}
+                {/* Sticky section header — pins under the app bar (below the
+                    sort row when that's pinned too) while you're in this group,
+                    then the next group's header takes over. */}
                 <div
-                  className={`sticky top-[var(--appbar-h)] z-10 flex items-baseline gap-3 border-b bg-paper/95 pt-3 pb-2.5 backdrop-blur ${meta.rule}`}
+                  className={`sticky ${groupHeaderTop} z-10 flex items-baseline gap-3 border-b bg-paper/95 pt-3 pb-2.5 backdrop-blur ${meta.rule}`}
                 >
                   <span
                     className={`h-2 w-2 shrink-0 translate-y-[-1px] rounded-full ${meta.dot}`}
@@ -107,6 +122,7 @@ export default function TriageSection({
                       onCommentFocus={onCommentFocus}
                       onNext={() => onNext(service.id)}
                       allDecided={allDecided}
+                      collapsibleWhy={scaled}
                     />
                   ))}
                 </div>
@@ -135,6 +151,7 @@ export default function TriageSection({
                 onNext={() => onNext(service.id)}
                 allDecided={allDecided}
                 showUrgency
+                collapsibleWhy={scaled}
               />
             ))}
         </div>

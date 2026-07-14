@@ -2,6 +2,7 @@ import { Progress } from '@base-ui-components/react/progress'
 import { Tabs } from '@base-ui-components/react/tabs'
 import { vehicle } from '../data/estimate'
 import type { Ledger } from '../lib/ledger'
+import { isLongList } from '../lib/scale'
 
 export const SECTIONS = [
   { id: 'details', label: 'Details' },
@@ -98,27 +99,50 @@ export default function TopBar({ active, onNavigate, ledger }: Props) {
           </Tabs.List>
         </Tabs.Root>
 
-        {/* Review progress — one pip per service, coloured by state, so the bar
-            shows how far along you are AND the approve/decline mix at a glance. */}
+        {/* Review progress. Short lists get one pip per service, coloured by
+            state, so the bar shows progress AND the approve/decline mix at a
+            glance. Long lists switch to a fixed-width composition fill: the
+            same information in constant space, so it never crowds the header or
+            pushes the count off-screen (which a long pip row does on mobile).
+            The `decided/total` count is always present and never shrinks. */}
         <Progress.Root
           value={decided}
           max={total}
           className="ml-auto flex flex-none items-center gap-2"
           aria-label={`${decided} of ${total} services reviewed`}
         >
-          <div
-            className="flex items-center gap-1"
-            aria-hidden
-            title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
-          >
-            {pips.map((s, i) => (
-              <span
-                key={i}
-                className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${pipClass[s]}`}
-              />
-            ))}
-          </div>
-          <span className="tnum whitespace-nowrap text-xs font-medium text-ink-faint">
+          {isLongList(total) ? (
+            <div
+              className="h-1.5 w-16 overflow-hidden rounded-full bg-ink/15"
+              aria-hidden
+              title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
+            >
+              <div className="flex h-full w-full">
+                <span
+                  className="h-full bg-approve transition-all duration-500 ease-out"
+                  style={{ width: `${total ? (ledger.approvedCount / total) * 100 : 0}%` }}
+                />
+                <span
+                  className="h-full bg-ink-faint transition-all duration-500 ease-out"
+                  style={{ width: `${total ? (ledger.declinedCount / total) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex items-center gap-1"
+              aria-hidden
+              title={`${ledger.approvedCount} approved · ${ledger.declinedCount} declined · ${ledger.pendingCount} left`}
+            >
+              {pips.map((s, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${pipClass[s]}`}
+                />
+              ))}
+            </div>
+          )}
+          <span className="tnum flex-none whitespace-nowrap text-xs font-medium text-ink-faint">
             {decided}/{total}
           </span>
         </Progress.Root>
